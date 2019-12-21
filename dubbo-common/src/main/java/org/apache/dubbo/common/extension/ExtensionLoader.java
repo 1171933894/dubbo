@@ -84,8 +84,10 @@ public class ExtensionLoader<T> {
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
 
+    // 扩展类与对应的扩展类加载器缓存
     private static final ConcurrentMap<Class<?>, ExtensionLoader<?>> EXTENSION_LOADERS = new ConcurrentHashMap<>();
 
+    // 扩展类与类初始化后的实例
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<>();
 
     private final Class<?> type;
@@ -94,15 +96,18 @@ public class ExtensionLoader<T> {
 
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<>();
 
+    // 普通扩展类缓存，不包括自适应扩展类和Wrapper类
     private final Holder<Map<String, Class<?>>> cachedClasses = new Holder<>();
 
+    // 扩展名与@Activate的缓存
     private final Map<String, Object> cachedActivates = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Holder<Object>> cachedInstances = new ConcurrentHashMap<>();// 扩展名与扩展对象缓存
     private final Holder<Object> cachedAdaptiveInstance = new Holder<>();
-    private volatile Class<?> cachedAdaptiveClass = null;
+    private volatile Class<?> cachedAdaptiveClass = null;// 自适应扩展类缓存
     private String cachedDefaultName;
     private volatile Throwable createAdaptiveInstanceError;
 
+    // Wrapper类缓存
     private Set<Class<?>> cachedWrapperClasses;
 
     private Map<String, IllegalStateException> exceptions = new ConcurrentHashMap<>();
@@ -600,6 +605,7 @@ public class ExtensionLoader<T> {
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
             if (CollectionUtils.isNotEmpty(wrapperClasses)) {
                 for (Class<?> wrapperClass : wrapperClasses) {
+                    // 遍历扩展点包装类，用于初始化包装类实例
                     instance = injectExtension((T) wrapperClass.getConstructor(type).newInstance(instance));
                 }
             }
@@ -623,7 +629,7 @@ public class ExtensionLoader<T> {
 
         try {
             for (Method method : instance.getClass().getMethods()) {
-                if (!isSetter(method)) {
+                if (!isSetter(method)) {// 找到以set开头的方法，要求只有一个参数，并且是public方法
                     continue;
                 }
                 /**
@@ -632,15 +638,17 @@ public class ExtensionLoader<T> {
                 if (method.getAnnotation(DisableInject.class) != null) {
                     continue;
                 }
-                Class<?> pt = method.getParameterTypes()[0];
+                Class<?> pt = method.getParameterTypes()[0];// 得到参数的类型
                 if (ReflectUtils.isPrimitives(pt)) {
                     continue;
                 }
 
                 try {
+                    // 通过字符串截取，获得小写开头的类名。如setTestService，截取testService
                     String property = getSetterProperty(method);
-                    Object object = objectFactory.getExtension(pt, property);
+                    Object object = objectFactory.getExtension(pt, property);// tongguo ExtensionFactory获取实例
                     if (object != null) {
+                        // 如果获取了这个扩展类实现，则调用set方法，把实例注入进去
                         method.invoke(instance, object);
                     }
                 } catch (Exception e) {
@@ -696,6 +704,8 @@ public class ExtensionLoader<T> {
         return getExtensionClasses().get(name);
     }
 
+    // Dubbo SPI获取扩展类时，会先从缓存中获取，如果缓存中不存在，则加载配置文件，将class缓存到内存中，
+    // 并不会全部实例化
     private Map<String, Class<?>> getExtensionClasses() {
         Map<String, Class<?>> classes = cachedClasses.get();
         if (classes == null) {
@@ -964,6 +974,7 @@ public class ExtensionLoader<T> {
     }
 
     private Class<?> createAdaptiveExtensionClass() {
+        // 生成class文件字符串
         String code = new AdaptiveClassCodeGenerator(type, cachedDefaultName).generate();
         ClassLoader classLoader = findClassLoader();
         org.apache.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(org.apache.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();

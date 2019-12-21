@@ -44,18 +44,21 @@ public class JavassistCompiler extends AbstractCompiler {
         builder.setClassName(name);
 
         // process imported classes
+        // 通过正则表达式配出所有import包，并使用javassist添加import
         Matcher matcher = IMPORT_PATTERN.matcher(source);
         while (matcher.find()) {
             builder.addImports(matcher.group(1).trim());
         }
 
         // process extended super class
+        // 通过正则表达式匹配出所有extends的包，创建class对象，并使用javassist添加extends
         matcher = EXTENDS_PATTERN.matcher(source);
         if (matcher.find()) {
             builder.setSuperClassName(matcher.group(1).trim());
         }
 
         // process implemented interfaces
+        // 通过正则表达式匹配出所有implements包，并使用javassist添加implements
         matcher = IMPLEMENTS_PATTERN.matcher(source);
         if (matcher.find()) {
             String[] ifaces = matcher.group(1).trim().split("\\,");
@@ -63,6 +66,7 @@ public class JavassistCompiler extends AbstractCompiler {
         }
 
         // process constructors, fields, methods
+        // 通过正则匹配出类里面所有内容，即得到{}中的内容，再通过正则匹配出所有的方法，并使用javassist添加类方法
         String body = source.substring(source.indexOf('{') + 1, source.length() - 1);
         String[] methods = METHODS_PATTERN.split(body);
         String className = ClassUtils.getSimpleClassName(name);
@@ -79,6 +83,7 @@ public class JavassistCompiler extends AbstractCompiler {
         // compile
         ClassLoader classLoader = org.apache.dubbo.common.utils.ClassUtils.getCallerClassLoader(getClass());
         CtClass cls = builder.build(classLoader);
+        // 生成class对象
         return cls.toClass(classLoader, JavassistCompiler.class.getProtectionDomain());
     }
 

@@ -92,6 +92,7 @@ public class AdaptiveClassCodeGenerator {
 
         StringBuilder code = new StringBuilder();
         code.append(generatePackageInfo());
+        // 只会import一个类，其他都是以全路径的方式调用
         code.append(generateImports());
         code.append(generateClassDeclaration());
 
