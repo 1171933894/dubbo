@@ -112,10 +112,10 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
         // @since 2.7.5
         registerBeans(registry, DubboBootstrapApplicationListener.class);
 
-        Set<String> resolvedPackagesToScan = resolvePackagesToScan(packagesToScan);
+        Set<String> resolvedPackagesToScan = resolvePackagesToScan(packagesToScan);// 获取用户注解配置的包扫描
 
         if (!CollectionUtils.isEmpty(resolvedPackagesToScan)) {
-            registerServiceBeans(resolvedPackagesToScan, registry);
+            registerServiceBeans(resolvedPackagesToScan, registry);// 触发ServiceBean定义和注入
         } else {
             if (logger.isWarnEnabled()) {
                 logger.warn("packagesToScan is empty , ServiceBean registry will be ignored!");
@@ -148,21 +148,23 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
          * The issue : https://github.com/apache/dubbo/issues/4330
          * @since 2.7.3
          */
+        // 指定扫描dubbo的注解@Service，不会扫描Spring的Service注解
         scanner.addIncludeFilter(new AnnotationTypeFilter(com.alibaba.dubbo.config.annotation.Service.class));
 
         for (String packageToScan : packagesToScan) {
 
             // Registers @Service Bean first
-            scanner.scan(packageToScan);
+            scanner.scan(packageToScan);// 将@Service作为不同Bean注入容器
 
             // Finds all BeanDefinitionHolders of @Service whether @ComponentScan scans or not.
+            // 对扫描的服务创建BeanDefinitionHolder，用于生成ServiceBean定义
             Set<BeanDefinitionHolder> beanDefinitionHolders =
                     findServiceBeanDefinitionHolders(scanner, packageToScan, registry, beanNameGenerator);
 
             if (!CollectionUtils.isEmpty(beanDefinitionHolders)) {
 
                 for (BeanDefinitionHolder beanDefinitionHolder : beanDefinitionHolders) {
-                    registerServiceBean(beanDefinitionHolder, registry, scanner);
+                    registerServiceBean(beanDefinitionHolder, registry, scanner);// 注册ServiceBean定义并做数据绑定和解析
                 }
 
                 if (logger.isInfoEnabled()) {

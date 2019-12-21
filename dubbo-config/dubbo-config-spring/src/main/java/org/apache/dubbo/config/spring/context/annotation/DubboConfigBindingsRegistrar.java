@@ -47,6 +47,7 @@ public class DubboConfigBindingsRegistrar implements ImportBeanDefinitionRegistr
         AnnotationAttributes attributes = AnnotationAttributes.fromMap(
                 importingClassMetadata.getAnnotationAttributes(EnableDubboConfigBindings.class.getName()));
 
+        // 获取EnableDubboCOnfigBindings注解所有值
         AnnotationAttributes[] annotationAttributes = attributes.getAnnotationArray("value");
 
         DubboConfigBindingRegistrar registrar = new DubboConfigBindingRegistrar();
@@ -54,7 +55,7 @@ public class DubboConfigBindingsRegistrar implements ImportBeanDefinitionRegistr
 
         for (AnnotationAttributes element : annotationAttributes) {
 
-            registrar.registerBeanDefinitions(element, registry);
+            registrar.registerBeanDefinitions(element, registry);// 将每个EnableDubboConfigBindings注解包含的Bean注册到Spring容器
 
         }
     }
