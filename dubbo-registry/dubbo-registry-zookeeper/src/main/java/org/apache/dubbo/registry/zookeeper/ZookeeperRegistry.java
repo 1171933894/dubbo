@@ -143,18 +143,23 @@ public class ZookeeperRegistry extends FailbackRegistry {
     @Override
     public void doSubscribe(final URL url, final NotifyListener listener) {
         try {
-            if (ANY_VALUE.equals(url.getServiceInterface())) {
+            // 1）此处主要支持dubbo服务治理平台，平台在启动时会订阅全量接口，它会通知每个服务的状态
+            if (ANY_VALUE.equals(url.getServiceInterface())) {// 订阅所有数据
                 String root = toRootPath();
                 ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
                 if (listeners == null) {
+                    // listener为空说明缓存中没有，这里把listeners放入缓存
                     zkListeners.putIfAbsent(url, new ConcurrentHashMap<>());
                     listeners = zkListeners.get(url);
                 }
                 ChildListener zkListener = listeners.get(listener);
                 if (zkListener == null) {
+                    // zkListener为空，说明是第一次，新建一个listener
                     listeners.putIfAbsent(listener, (parentPath, currentChilds) -> {
-                        for (String child : currentChilds) {
+                        // 内部方法，不会立即执行，只会在触发变更通知时执行
+                        for (String child : currentChilds) {// 如果子节点有变化则会接到通知，遍历所有的子节点
                             child = URL.decode(child);
+                            // 如果存在子节点还未被订阅，说明是新的节点，则订阅
                             if (!anyServices.contains(child)) {
                                 anyServices.add(child);
                                 subscribe(url.setPath(child).addParameters(INTERFACE_KEY, child,
@@ -164,35 +169,41 @@ public class ZookeeperRegistry extends FailbackRegistry {
                     });
                     zkListener = listeners.get(listener);
                 }
-                zkClient.create(root, false);
+                zkClient.create(root, false);// 创建持久节点，接下来订阅持久节点的直接子节点
                 List<String> services = zkClient.addChildListener(root, zkListener);
-                if (CollectionUtils.isNotEmpty(services)) {
+                if (CollectionUtils.isNotEmpty(services)) {// 然后遍历所有子节点进行订阅
                     for (String service : services) {
                         service = URL.decode(service);
                         anyServices.add(service);
+                        // 增加当前节点的订阅，并且会返回该节点下所有子节点的列表
                         subscribe(url.setPath(service).addParameters(INTERFACE_KEY, service,
                                 Constants.CHECK_KEY, String.valueOf(false)), listener);
                     }
                 }
             } else {
+                // 2）普通消费者订阅逻辑
                 List<URL> urls = new ArrayList<>();
-                for (String path : toCategoriesPath(url)) {
+                for (String path : toCategoriesPath(url)) {// 根据URL的类别，获取一组要订阅的路径
                     ConcurrentMap<NotifyListener, ChildListener> listeners = zkListeners.get(url);
                     if (listeners == null) {
+                        // 如果缓存为空则创建缓存
                         zkListeners.putIfAbsent(url, new ConcurrentHashMap<>());
                         listeners = zkListeners.get(url);
                     }
                     ChildListener zkListener = listeners.get(listener);
                     if (zkListener == null) {
+                        // 如果zkListener为空则创建缓存
                         listeners.putIfAbsent(listener, (parentPath, currentChilds) -> ZookeeperRegistry.this.notify(url, listener, toUrlsWithEmpty(url, parentPath, currentChilds)));
                         zkListener = listeners.get(listener);
                     }
                     zkClient.create(path, false);
+                    // 订阅，返回该节点下的子路径并缓存
                     List<String> children = zkClient.addChildListener(path, zkListener);
                     if (children != null) {
                         urls.addAll(toUrlsWithEmpty(url, path, children));
                     }
                 }
+                // 回调NotifyListener，更新本地缓存信息
                 notify(url, listener, urls);
             }
         } catch (Throwable e) {

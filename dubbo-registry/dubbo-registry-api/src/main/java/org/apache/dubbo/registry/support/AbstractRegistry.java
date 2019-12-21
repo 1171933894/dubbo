@@ -87,9 +87,15 @@ public abstract class AbstractRegistry implements Registry {
     private final AtomicInteger savePropertiesRetryTimes = new AtomicInteger();
     private final Set<URL> registered = new ConcurrentHashSet<>();
     private final ConcurrentMap<URL, Set<NotifyListener>> subscribed = new ConcurrentHashMap<>();
+    // 内存中的服务缓存对象
+    /**
+     * 外层Map的key是消费者的URL，内存Map的key是分类，包括providers、consumers、routes、configurators四种。
+     * value则是对于的服务列表，对于没有服务提供者提供服务的URL，它会以empty：//前缀开头
+     */
     private final ConcurrentMap<URL, Map<String, List<URL>>> notified = new ConcurrentHashMap<>();
     private URL registryUrl;
     // Local disk cache file
+    // 磁盘文件服务缓存对象
     private File file;
 
     public AbstractRegistry(URL url) {
@@ -211,7 +217,7 @@ public abstract class AbstractRegistry implements Registry {
         if (file != null && file.exists()) {
             InputStream in = null;
             try {
-                in = new FileInputStream(file);
+                in = new FileInputStream(file);// 读取磁盘上的文件
                 properties.load(in);
                 if (logger.isInfoEnabled()) {
                     logger.info("Load registry cache file " + file + ", data: " + properties);
@@ -447,9 +453,10 @@ public abstract class AbstractRegistry implements Registry {
             }
             properties.setProperty(url.getServiceKey(), buf.toString());
             long version = lastCacheChanged.incrementAndGet();
-            if (syncSaveFile) {
+            if (syncSaveFile) {// 同步保存
                 doSaveProperties(version);
             } else {
+                // 异步保存，放入线程池。会传入一个AtomicLong的版本号，保证数据是最新的。
                 registryCacheExecutor.execute(new SaveProperties(version));
             }
         } catch (Throwable t) {
