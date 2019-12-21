@@ -39,6 +39,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+// DubboComponentScan注解
 @Import(DubboComponentScanRegistrar.class)
 public @interface DubboComponentScan {
 
