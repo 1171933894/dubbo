@@ -286,7 +286,7 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
         } else {
             urls.clear();
             if (url != null && url.length() > 0) { // user specified URL, could be peer-to-peer address, or register center's address.
-                String[] us = SEMICOLON_SPLIT_PATTERN.split(url);
+                String[] us = SEMICOLON_SPLIT_PATTERN.split(url);// 支持使用分号隔开指定的多个直连机器
                 if (us != null && us.length > 0) {
                     for (String u : us) {
                         URL url = URL.valueOf(u);
@@ -294,8 +294,10 @@ public class ReferenceConfig<T> extends ReferenceConfigBase<T> {
                             url = url.setPath(interfaceName);
                         }
                         if (UrlUtils.isRegistry(url)) {
+                            // 允许直连地址写成注册中心
                             urls.add(url.addParameterAndEncoded(REFER_KEY, StringUtils.toQueryString(map)));
                         } else {
+                            // 直连某一台服务提供者
                             urls.add(ClusterUtils.mergeUrl(url, map));
                         }
                     }
