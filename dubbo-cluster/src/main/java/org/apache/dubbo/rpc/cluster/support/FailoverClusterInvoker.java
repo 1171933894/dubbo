@@ -56,8 +56,9 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Result doInvoke(Invocation invocation, final List<Invoker<T>> invokers, LoadBalance loadbalance) throws RpcException {
         List<Invoker<T>> copyInvokers = invokers;
-        checkInvokers(copyInvokers, invocation);
+        checkInvokers(copyInvokers, invocation);// 检验传入的invokers列表是否为空
         String methodName = RpcUtils.getMethodName(invocation);
+        // 从调用URL中获取对应的retries重试次数
         int len = getUrl().getMethodParameter(methodName, RETRIES_KEY, DEFAULT_RETRIES) + 1;
         if (len <= 0) {
             len = 1;
@@ -69,12 +70,14 @@ public class FailoverClusterInvoker<T> extends AbstractClusterInvoker<T> {
         for (int i = 0; i < len; i++) {
             //Reselect before retry to avoid a change of candidate `invokers`.
             //NOTE: if `invokers` changed, then `invoked` also lose accuracy.
+            // 校验。如果for循环次数大于1，即有过一次失败，则会再次校验节点是否被销毁、传入的invoker列表是否为空
             if (i > 0) {
                 checkWhetherDestroyed();
                 copyInvokers = list(invocation);
                 // check again
                 checkInvokers(copyInvokers, invocation);
             }
+            // 调用select方法做负载均衡，得到要调用的节点并记录在集合里，再把已经调用的节点信息放进RPC上下文中
             Invoker<T> invoker = select(loadbalance, invocation, copyInvokers, invoked);
             invoked.add(invoker);
             RpcContext.getContext().setInvokers((List) invoked);
