@@ -42,6 +42,7 @@ public interface RouterFactory {
      * @param url url
      * @return router instance
      */
+    // protocol可以设置file、script、condition
     @Adaptive("protocol")
     Router getRouter(URL url);
 }

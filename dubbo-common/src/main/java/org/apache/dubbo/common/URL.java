@@ -92,20 +92,27 @@ class URL implements Serializable {
 
     private static final long serialVersionUID = -1985165475234910535L;
 
+    /** 协议 （例如： dubbo:// zookeeper://） */
     private final String protocol;
 
+    /** 用户名 （例如: dubbo://hadluo） */
     private final String username;
 
+    /** 密码 */
     private final String password;
 
     // by default, host to registry
+    /** 地址 */
     private final String host;
 
+    /** 端口 */
     // by default, port to registry
     private final int port;
 
+    /** 上下文路径 */
     private final String path;
 
+    /** 附加参数 */
     private final Map<String, String> parameters;
 
     private final Map<String, Map<String, String>> methodParameters;
@@ -126,6 +133,7 @@ class URL implements Serializable {
 
     private volatile transient String parameter;
 
+    /** 缓存 优化 当前URL的 toString（） */
     private volatile transient String string;
 
     private transient String serviceKey;

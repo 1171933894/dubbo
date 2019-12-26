@@ -34,7 +34,7 @@ public interface ProxyFactory {
      * @param invoker
      * @return proxy
      */
-    @Adaptive({PROXY_KEY})
+    @Adaptive({PROXY_KEY})// 会根据URL中的proxy参数决定使用哪种字节码生成工具
     <T> T getProxy(Invoker<T> invoker) throws RpcException;
 
     /**

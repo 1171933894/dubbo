@@ -82,6 +82,7 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
             throw new RpcException("Directory already destroyed .url: " + getUrl());
         }
 
+        // 抽象的doList方法给子类自行实现
         return doList(invocation);
     }
 

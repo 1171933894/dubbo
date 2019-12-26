@@ -88,6 +88,8 @@ import static org.apache.dubbo.rpc.cluster.Constants.ROUTER_KEY;
 /**
  * RegistryDirectory
  */
+// 1 框架与注册中心的订阅，并动态更新本地invoker列表、路由列表、配置信息
+// 2 子类实现父类的doList方法
 public class RegistryDirectory<T> extends AbstractDirectory<T> implements NotifyListener {
 
     private static final Logger logger = LoggerFactory.getLogger(RegistryDirectory.class);
