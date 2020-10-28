@@ -26,6 +26,10 @@ import java.util.List;
  *
  * @export
  */
+
+/**
+ * 继承 AbstractMethodConfig ，方法级配置
+ */
 public class MethodConfig extends AbstractMethodConfig {
 
     private static final long serialVersionUID = 884908855422675941L;

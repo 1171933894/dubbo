@@ -38,6 +38,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @export
  */
+
+/**
+ * 服务提供者协议配置
+ */
 public class ProtocolConfig extends AbstractConfig {
 
     private static final long serialVersionUID = 6913423882496634749L;

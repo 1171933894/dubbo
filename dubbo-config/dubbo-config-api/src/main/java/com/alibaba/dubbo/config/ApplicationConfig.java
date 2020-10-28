@@ -31,6 +31,10 @@ import java.util.Map;
  *
  * @export
  */
+
+/**
+ * 应用配置
+ */
 public class ApplicationConfig extends AbstractConfig {
 
     private static final long serialVersionUID = 5508512956753757169L;

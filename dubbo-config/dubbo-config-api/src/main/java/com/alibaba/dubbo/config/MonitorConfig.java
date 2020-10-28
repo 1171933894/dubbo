@@ -25,6 +25,10 @@ import java.util.Map;
  *
  * @export
  */
+
+/**
+ * 监控中心配置
+ */
 public class MonitorConfig extends AbstractConfig {
 
     private static final long serialVersionUID = -1184681514659198203L;
