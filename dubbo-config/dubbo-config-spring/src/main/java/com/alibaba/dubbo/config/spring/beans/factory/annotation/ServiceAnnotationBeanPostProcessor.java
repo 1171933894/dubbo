@@ -71,7 +71,9 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
         ResourceLoaderAware, BeanClassLoaderAware {
 
     private final Logger logger = LoggerFactory.getLogger(getClass());
-
+    /**
+     * 要扫描的包的集合
+     */
     private final Set<String> packagesToScan;
 
     private Environment environment;
@@ -80,6 +82,7 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
 
     private ClassLoader classLoader;
 
+    // 上述文章使用到的构造方法
     public ServiceAnnotationBeanPostProcessor(String... packagesToScan) {
         this(Arrays.asList(packagesToScan));
     }
@@ -95,8 +98,9 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
     @Override
     public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry registry) throws BeansException {
 
+        // <1> 解析 packagesToScan 集合。因为，可能存在占位符
         Set<String> resolvedPackagesToScan = resolvePackagesToScan(packagesToScan);
-
+        // <2> 扫描 packagesToScan 包，创建对应的 Spring BeanDefinition 对象，从而创建 Dubbo Service Bean 对象
         if (!CollectionUtils.isEmpty(resolvedPackagesToScan)) {
             registerServiceBeans(resolvedPackagesToScan, registry);
         } else {
@@ -115,25 +119,26 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
      * @param registry       {@link BeanDefinitionRegistry}
      */
     private void registerServiceBeans(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
-
+        // <1.1> 创建 DubboClassPathBeanDefinitionScanner 对象
         DubboClassPathBeanDefinitionScanner scanner =
                 new DubboClassPathBeanDefinitionScanner(registry, environment, resourceLoader);
-
+        // <1.2> 获得 BeanNameGenerator 对象，并设置 beanNameGenerator 到 scanner 中
         BeanNameGenerator beanNameGenerator = resolveBeanNameGenerator(registry);
 
         scanner.setBeanNameGenerator(beanNameGenerator);
-
+        // <1.3> 设置过滤获得带有 @Service 注解的类
         scanner.addIncludeFilter(new AnnotationTypeFilter(Service.class));
-
+        // <2> 遍历 packagesToScan 数组
         for (String packageToScan : packagesToScan) {
 
             // Registers @Service Bean first
-            scanner.scan(packageToScan);
+            scanner.scan(packageToScan);// <2.1> 执行扫描
 
+            // <2.2> 创建每个在 packageToScan 扫描到的类，对应的 BeanDefinitionHolder 对象，返回 BeanDefinitionHolder 集合
             // Finds all BeanDefinitionHolders of @Service whether @ComponentScan scans or not.
             Set<BeanDefinitionHolder> beanDefinitionHolders =
                     findServiceBeanDefinitionHolders(scanner, packageToScan, registry, beanNameGenerator);
-
+            // <2.3> 注册到 registry 中
             if (!CollectionUtils.isEmpty(beanDefinitionHolders)) {
 
                 for (BeanDefinitionHolder beanDefinitionHolder : beanDefinitionHolders) {
@@ -344,10 +349,11 @@ public class ServiceAnnotationBeanPostProcessor implements BeanDefinitionRegistr
 
     private Set<String> resolvePackagesToScan(Set<String> packagesToScan) {
         Set<String> resolvedPackagesToScan = new LinkedHashSet<String>(packagesToScan.size());
-        for (String packageToScan : packagesToScan) {
+        for (String packageToScan : packagesToScan) {// 遍历 packagesToScan 数组
             if (StringUtils.hasText(packageToScan)) {
+                // 解析可能存在的占位符
                 String resolvedPackageToScan = environment.resolvePlaceholders(packageToScan.trim());
-                resolvedPackagesToScan.add(resolvedPackageToScan);
+                resolvedPackagesToScan.add(resolvedPackageToScan);// 添加到 resolvedPackagesToScan 中
             }
         }
         return resolvedPackagesToScan;

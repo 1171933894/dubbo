@@ -68,13 +68,16 @@ public class DubboComponentScanRegistrar implements ImportBeanDefinitionRegistra
      * @param registry       {@link BeanDefinitionRegistry}
      * @since 2.5.8
      */
+    /**
+     * 调用 #registerServiceAnnotationBeanPostProcessor(Set<String> packagesToScan, BeanDefinitionRegistry registry) 方法，创建 ServiceAnnotationBeanPostProcessor Bean 对象，后续扫描 @Service 注解的类，创建对应的 Service Bean 对象
+     */
     private void registerServiceAnnotationBeanPostProcessor(Set<String> packagesToScan, BeanDefinitionRegistry registry) {
-
+        // 创建 BeanDefinitionBuilder 对象
         BeanDefinitionBuilder builder = rootBeanDefinition(ServiceAnnotationBeanPostProcessor.class);
-        builder.addConstructorArgValue(packagesToScan);
-        builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);
-        AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();
-        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);
+        builder.addConstructorArgValue(packagesToScan);// 设置构造方法参数为 packagesToScan ，即 BeanDefinitionBuilder 扫描该包
+        builder.setRole(BeanDefinition.ROLE_INFRASTRUCTURE);// 设置 role 属性
+        AbstractBeanDefinition beanDefinition = builder.getBeanDefinition();// 获得 AbstractBeanDefinition 对象
+        BeanDefinitionReaderUtils.registerWithGeneratedName(beanDefinition, registry);// 注册到 registry 中
 
     }
 
@@ -82,6 +85,9 @@ public class DubboComponentScanRegistrar implements ImportBeanDefinitionRegistra
      * Registers {@link ReferenceAnnotationBeanPostProcessor} into {@link BeanFactory}
      *
      * @param registry {@link BeanDefinitionRegistry}
+     */
+    /**
+     * 调用 #registerReferenceAnnotationBeanPostProcessor(BeanDefinitionRegistry registry) 方法，创建 ReferenceAnnotationBeanPostProcessor Bean 对象，后续扫描 @Reference 注解的类，创建对应的 Reference Bean 对象
      */
     private void registerReferenceAnnotationBeanPostProcessor(BeanDefinitionRegistry registry) {
 
