@@ -27,6 +27,10 @@ import com.alibaba.dubbo.rpc.support.ProtocolUtils;
  * @export
  * @see com.alibaba.dubbo.config.ReferenceConfig
  */
+
+/**
+ * 实现 AbstractInterfaceConfig ，抽象引用配置类
+ */
 public abstract class AbstractReferenceConfig extends AbstractInterfaceConfig {
 
     private static final long serialVersionUID = -2786526984373031126L;

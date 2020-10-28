@@ -21,6 +21,10 @@ package com.alibaba.dubbo.config;
  *
  * @export
  */
+
+/**
+ * 实现 AbstractReferenceConfig ，服务消费者缺省值配置
+ */
 public class ConsumerConfig extends AbstractReferenceConfig {
 
     private static final long serialVersionUID = 2827274711143680600L;
