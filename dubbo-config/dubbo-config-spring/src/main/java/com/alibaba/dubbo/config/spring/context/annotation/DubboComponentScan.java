@@ -43,7 +43,7 @@ public @interface DubboComponentScan {
      *
      * @return the base packages to scan
      */
-    String[] value() default {};
+    String[] value() default {};// 和 {@link #basePackages()} 等价
 
     /**
      * Base packages to scan for annotated @Service classes. {@link #value()} is an
@@ -54,7 +54,7 @@ public @interface DubboComponentScan {
      *
      * @return the base packages to scan
      */
-    String[] basePackages() default {};
+    String[] basePackages() default {};// 要扫描的包的数组
 
     /**
      * Type-safe alternative to {@link #basePackages()} for specifying the packages to
@@ -63,6 +63,6 @@ public @interface DubboComponentScan {
      *
      * @return classes from the base packages to scan
      */
-    Class<?>[] basePackageClasses() default {};
+    Class<?>[] basePackageClasses() default {};// 要扫描的类的数组
 
 }

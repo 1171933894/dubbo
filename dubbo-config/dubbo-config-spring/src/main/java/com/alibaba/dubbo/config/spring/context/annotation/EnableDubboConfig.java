@@ -63,6 +63,6 @@ public @interface EnableDubboConfig {
      * @return the default value is <code>false</code>
      * @revised 2.5.9
      */
-    boolean multiple() default false;
+    boolean multiple() default false;// 配置是否绑定到多个 Spring Bean 上
 
 }

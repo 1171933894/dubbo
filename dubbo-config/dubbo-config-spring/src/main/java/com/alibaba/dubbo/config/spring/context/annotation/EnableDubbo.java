@@ -35,8 +35,8 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
 @Documented
-@EnableDubboConfig
-@DubboComponentScan
+@EnableDubboConfig// 开启 Dubbo Config
+@DubboComponentScan// 扫描 Dubbo @Service 和 @Reference Bean
 public @interface EnableDubbo {
 
     /**
@@ -49,7 +49,7 @@ public @interface EnableDubbo {
      * @see DubboComponentScan#basePackages()
      */
     @AliasFor(annotation = DubboComponentScan.class, attribute = "basePackages")
-    String[] scanBasePackages() default {};
+    String[] scanBasePackages() default {};// 配置 @DubboComponentScan 注解，扫描的包
 
     /**
      * Type-safe alternative to {@link #scanBasePackages()} for specifying the packages to
@@ -60,7 +60,7 @@ public @interface EnableDubbo {
      * @see DubboComponentScan#basePackageClasses
      */
     @AliasFor(annotation = DubboComponentScan.class, attribute = "basePackageClasses")
-    Class<?>[] scanBasePackageClasses() default {};
+    Class<?>[] scanBasePackageClasses() default {};// 配置 @DubboComponentScan 注解，扫描的类
 
 
     /**
@@ -70,6 +70,6 @@ public @interface EnableDubbo {
      * @see EnableDubboConfig#multiple()
      */
     @AliasFor(annotation = EnableDubboConfig.class, attribute = "multiple")
-    boolean multipleConfig() default false;
+    boolean multipleConfig() default false;// 配置 @EnableDubboConfig 注解，配置是否绑定到多个 Spring Bean 上
 
 }

@@ -42,7 +42,7 @@ public class DubboConfigBindingBeanPostProcessor implements BeanPostProcessor {
     /**
      * Binding Bean Name
      */
-    private final String beanName;
+    private final String beanName;// Bean 的名字
 
     /**
      * Binding {@link PropertyValues}
