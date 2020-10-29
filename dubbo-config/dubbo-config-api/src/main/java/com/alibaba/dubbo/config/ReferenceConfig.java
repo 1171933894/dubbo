@@ -77,6 +77,9 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
      * 自适应 ProxyFactory 实现对象
      */
     private static final ProxyFactory proxyFactory = ExtensionLoader.getExtensionLoader(ProxyFactory.class).getAdaptiveExtension();
+    /**
+     * 服务引用 URL 数组
+     */
     private final List<URL> urls = new ArrayList<URL>();
     // interface name
     private String interfaceName;
@@ -85,7 +88,10 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
     private String client;
     // url for peer-to-peer invocation
     /**
-     * 直连服务提供者地址
+     * 直连服务地址
+     *
+     * 1. 可以是注册中心，也可以是服务提供者
+     * 2. 可配置多个，使用 ; 分隔
      */
     private String url;
     // method configs
@@ -384,6 +390,12 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         ApplicationModel.initConsumerModel(getUniqueServiceName(), consumerModel);
     }
 
+    /**
+     * 创建 Service 代理对象
+     *
+     * @param map 集合
+     * @return 代理对象
+     */
     @SuppressWarnings({"unchecked", "rawtypes", "deprecation"})
     private T createProxy(Map<String, String> map) {
         URL tmpUrl = new URL("temp", "localhost", 0, map);
@@ -411,29 +423,36 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                 logger.info("Using injvm service " + interfaceClass.getName());
             }
         } else {// 正常流程，一般为远程引用
+            // 定义直连地址，可以是服务提供者的地址，也可以是注册中心的地址
             if (url != null && url.length() > 0) { // user specified URL, could be peer-to-peer address, or register center's address.
+                // 拆分地址成数组，使用 ";" 分隔
                 String[] us = Constants.SEMICOLON_SPLIT_PATTERN.split(url);
                 if (us != null && us.length > 0) {
+                    // 循环数组，添加到 `url` 中
                     for (String u : us) {
+                        // 创建 URL 对象
                         URL url = URL.valueOf(u);
+                        // 设置默认路径
                         if (url.getPath() == null || url.getPath().length() == 0) {
                             url = url.setPath(interfaceName);
                         }
+                        // 注册中心的地址，带上服务引用的配置参数
                         if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
                             urls.add(url.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));
-                        } else {
+                        } else {// 服务提供者的地址
                             urls.add(ClusterUtils.mergeUrl(url, map));
                         }
                     }
                 }
-            } else { // assemble URL from register center's configuration
-                List<URL> us = loadRegistries(false);
-                if (us != null && us.size() > 0) {
+            } else { // assemble URL from register center's configuration// 注册中心
+                List<URL> us = loadRegistries(false);// 加载注册中心 URL 数组
+                if (us != null && us.size() > 0) { // 循环数组，添加到 `url` 中。
                     for (URL u : us) {
-                        URL monitorUrl = loadMonitor(u);
-                        if (monitorUrl != null) {
+                        URL monitorUrl = loadMonitor(u);// 加载监控中心 URL
+                        if (monitorUrl != null) {// 服务引用配置对象 `map`，带上监控中心的 URL
                             map.put(Constants.MONITOR_KEY, URL.encode(monitorUrl.toFullString()));
                         }
+                        // 注册中心的地址，带上服务引用的配置参数
                         urls.add(u.addParameterAndEncoded(Constants.REFER_KEY, StringUtils.toQueryString(map)));
                     }
                 }
@@ -442,22 +461,27 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
                 }
             }
 
+            // 单 `urls` 时，引用服务，返回 Invoker 对象
             if (urls.size() == 1) {
+                // 引用服务
                 invoker = refprotocol.refer(interfaceClass, urls.get(0));
             } else {
                 List<Invoker<?>> invokers = new ArrayList<Invoker<?>>();
                 URL registryURL = null;
-                for (URL url : urls) {
-                    invokers.add(refprotocol.refer(interfaceClass, url));
+                for (URL url : urls) {// 循环 `urls` ，引用服务，返回 Invoker 对象
+                    invokers.add(refprotocol.refer(interfaceClass, url));// 引用服务
+                    // 使用最后一个注册中心的 URL
                     if (Constants.REGISTRY_PROTOCOL.equals(url.getProtocol())) {
                         registryURL = url; // use last registry url
                     }
                 }
+                // 有注册中心
                 if (registryURL != null) { // registry url is available
+                    // 对有注册中心的 Cluster 只用 AvailableCluster
                     // use AvailableCluster only when register's cluster is available
                     URL u = registryURL.addParameter(Constants.CLUSTER_KEY, AvailableCluster.NAME);
                     invoker = cluster.join(new StaticDirectory(u, invokers));
-                } else { // not a registry url
+                } else { // not a registry url // 无注册中心
                     invoker = cluster.join(new StaticDirectory(invokers));
                 }
             }

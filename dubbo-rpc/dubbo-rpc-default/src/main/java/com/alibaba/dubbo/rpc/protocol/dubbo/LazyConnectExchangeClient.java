@@ -37,19 +37,24 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * dubbo protocol support class.
  */
+
+/**
+ * 基于装饰器模式，所以，每个实现方法，都是调用 client 的对应的方法
+ */
 @SuppressWarnings("deprecation")
 final class LazyConnectExchangeClient implements ExchangeClient {
 
     // when this warning rises from invocation, program probably have bug.
     static final String REQUEST_WITH_WARNING_KEY = "lazyclient_request_with_warning";
     private final static Logger logger = LoggerFactory.getLogger(LazyConnectExchangeClient.class);
-    protected final boolean requestWithWarning;
+    protected final boolean requestWithWarning;// 请求时，是否检查告警
     private final URL url;
-    private final ExchangeHandler requestHandler;
-    private final Lock connectLock = new ReentrantLock();
+    private final ExchangeHandler requestHandler;// 通道处理器
+    private final Lock connectLock = new ReentrantLock();// 连接锁
     // lazy connect, initial state for connection
-    private final boolean initialState;
-    private volatile ExchangeClient client;
+    private final boolean initialState;// lazy connect 如果没有初始化时的连接状态
+    private volatile ExchangeClient client;// 通信客户端
+    // 警告计数器。每超过一定次数，打印告警日志。参见 {@link #warning(Object)}
     private AtomicLong warningcount = new AtomicLong(0);
 
     public LazyConnectExchangeClient(URL url, ExchangeHandler requestHandler) {
@@ -63,17 +68,17 @@ final class LazyConnectExchangeClient implements ExchangeClient {
 
     private void initClient() throws RemotingException {
         if (client != null)
-            return;
+            return;// 已初始化，跳过
         if (logger.isInfoEnabled()) {
             logger.info("Lazy connect to " + url);
         }
-        connectLock.lock();
+        connectLock.lock();// 获得锁
         try {
             if (client != null)
-                return;
-            this.client = Exchangers.connect(url, requestHandler);
+                return;// 已初始化，跳过
+            this.client = Exchangers.connect(url, requestHandler);// 创建 Client ，连接服务器
         } finally {
-            connectLock.unlock();
+            connectLock.unlock();// 释放锁
         }
     }
 
@@ -107,11 +112,11 @@ final class LazyConnectExchangeClient implements ExchangeClient {
      * @param request
      */
     private void warning(Object request) {
-        if (requestWithWarning) {
-            if (warningcount.get() % 5000 == 0) {
+        if (requestWithWarning) {// 开启
+            if (warningcount.get() % 5000 == 0) {// 5000 次
                 logger.warn(new IllegalStateException("safe guard client , should not be called ,must have a bug."));
             }
-            warningcount.incrementAndGet();
+            warningcount.incrementAndGet();// 增加计数
         }
     }
 
@@ -122,7 +127,7 @@ final class LazyConnectExchangeClient implements ExchangeClient {
 
     public boolean isConnected() {
         if (client == null) {
-            return initialState;
+            return initialState;// 客户端未初始化
         } else {
             return client.isConnected();
         }

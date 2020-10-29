@@ -32,20 +32,29 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * dubbo protocol support class.
  */
+
+/**
+ * 基于装饰器模式，所以，每个实现方法，都是调用 client 的对应的方法。例如：
+ *
+ * @Override
+ * public void send(Object message) throws RemotingException {
+ *     client.send(message);
+ * }
+ */
 @SuppressWarnings("deprecation")
 final class ReferenceCountExchangeClient implements ExchangeClient {
 
     private final URL url;
-    private final AtomicInteger refenceCount = new AtomicInteger(0);
+    private final AtomicInteger refenceCount = new AtomicInteger(0);// 指向数量
 
     //    private final ExchangeHandler handler;
-    private final ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap;
-    private ExchangeClient client;
+    private final ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap;// 幽灵客户端集合
+    private ExchangeClient client;// 客户端
 
 
     public ReferenceCountExchangeClient(ExchangeClient client, ConcurrentMap<String, LazyConnectExchangeClient> ghostClientMap) {
         this.client = client;
-        refenceCount.incrementAndGet();
+        refenceCount.incrementAndGet();// 指向加一
         this.url = client.getUrl();
         if (ghostClientMap == null) {
             throw new IllegalStateException("ghostClientMap can not be null, url: " + url);
@@ -130,11 +139,12 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
 
     public void close(int timeout) {
         if (refenceCount.decrementAndGet() <= 0) {
-            if (timeout == 0) {
+            if (timeout == 0) {// 关闭 `client`
                 client.close();
             } else {
                 client.close(timeout);
             }
+            // 替换 `client` 为 LazyConnectExchangeClient 对象
             client = replaceWithLazyClient();
         }
     }
@@ -153,7 +163,7 @@ final class ReferenceCountExchangeClient implements ExchangeClient {
                 .addParameter(LazyConnectExchangeClient.REQUEST_WITH_WARNING_KEY, true)
                 .addParameter("_client_memo", "referencecounthandler.replacewithlazyclient");
 
-        String key = url.getAddress();
+        String key = url.getAddress();// 创建 LazyConnectExchangeClient 对象，若不存在
         // in worst case there's only one ghost connection.
         LazyConnectExchangeClient gclient = ghostClientMap.get(key);
         if (gclient == null || gclient.isClosed()) {
