@@ -30,7 +30,7 @@ public interface Exporter<T> {
      *
      * @return invoker
      */
-    Invoker<T> getInvoker();
+    Invoker<T> getInvoker();// 获得对应的 Invoke
 
     /**
      * unexport.
@@ -39,6 +39,6 @@ public interface Exporter<T> {
      * getInvoker().destroy();
      * </code>
      */
-    void unexport();
+    void unexport();// 取消暴露, Exporter 相比 Invoker 接口，多了 这个方法。通过实现该方法，使相同的 Invoker 在不同的 Protocol 实现的取消暴露逻辑。
 
 }
