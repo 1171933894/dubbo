@@ -22,6 +22,10 @@ import com.alibaba.dubbo.common.extension.SPI;
 /**
  * InvokerListener. (SPI, Singleton, ThreadSafe)
  */
+
+/**
+ * Invoker 监听器
+ */
 @SPI
 public interface InvokerListener {
 

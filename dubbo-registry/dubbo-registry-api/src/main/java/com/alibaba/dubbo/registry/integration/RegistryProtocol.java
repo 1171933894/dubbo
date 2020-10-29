@@ -179,16 +179,29 @@ public class RegistryProtocol implements Protocol {
         return new DestroyableExporter<T>(exporter, originInvoker, overrideSubscribeUrl, registedProviderUrl);
     }
 
+    /**
+     * 暴露服务。
+     * <p>
+     * 此处的 Local 指的是，本地启动服务，但是不包括向注册中心注册服务的意思。
+     *
+     * @param originInvoker 原始 Invoker
+     * @param <T>           泛型
+     * @return Exporter 对象
+     */
     @SuppressWarnings("unchecked")
     private <T> ExporterChangeableWrapper<T> doLocalExport(final Invoker<T> originInvoker) {
-        String key = getCacheKey(originInvoker);
+        String key = getCacheKey(originInvoker);// 获得在 `bounds` 中的缓存 Key
+        // 从 `bounds` 获得，是不是已经暴露过服务
         ExporterChangeableWrapper<T> exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
-        if (exporter == null) {
+        if (exporter == null) {// 未暴露过，进行暴露服务
             synchronized (bounds) {
                 exporter = (ExporterChangeableWrapper<T>) bounds.get(key);
-                if (exporter == null) {
+                if (exporter == null) {// 创建 Invoker Delegate 对象
                     final Invoker<?> invokerDelegete = new InvokerDelegete<T>(originInvoker, getProviderUrl(originInvoker));
+                    // 暴露服务，创建 Exporter 对象
+                    // 使用 创建的Exporter对象 + originInvoker ，创建 ExporterChangeableWrapper 对象
                     exporter = new ExporterChangeableWrapper<T>((Exporter<T>) protocol.export(invokerDelegete), originInvoker);
+                    // 添加到 `bounds`
                     bounds.put(key, exporter);
                 }
             }
@@ -247,16 +260,20 @@ public class RegistryProtocol implements Protocol {
      * @param originInvoker
      * @return
      */
+    /**
+     * 获得服务提供者 URL
+     */
     private URL getRegistedProviderUrl(final Invoker<?> originInvoker) {
+        // 从注册中心的 export 参数中，获得服务提供者的 URL
         URL providerUrl = getProviderUrl(originInvoker);
         //The address you see at the registry
-        final URL registedProviderUrl = providerUrl.removeParameters(getFilteredKeys(providerUrl))
-                .removeParameter(Constants.MONITOR_KEY)
-                .removeParameter(Constants.BIND_IP_KEY)
-                .removeParameter(Constants.BIND_PORT_KEY)
-                .removeParameter(QOS_ENABLE)
-                .removeParameter(QOS_PORT)
-                .removeParameter(ACCEPT_FOREIGN_IP);
+        final URL registedProviderUrl = providerUrl.removeParameters(getFilteredKeys(providerUrl))// 移除 .hide 为前缀的参数
+                .removeParameter(Constants.MONITOR_KEY)// monitor
+                .removeParameter(Constants.BIND_IP_KEY)// bind.ip
+                .removeParameter(Constants.BIND_PORT_KEY)// bind.port
+                .removeParameter(QOS_ENABLE)// qos.enable
+                .removeParameter(QOS_PORT)// qos.port
+                .removeParameter(ACCEPT_FOREIGN_IP);// qos.accept.foreign.ip
         return registedProviderUrl;
     }
 
@@ -287,6 +304,14 @@ public class RegistryProtocol implements Protocol {
      *
      * @param originInvoker
      * @return
+     */
+    /**
+     * Get the key cached in bounds by invoker
+     *
+     * 获取invoker 在 bounds中 缓存的key
+     *
+     * @param originInvoker 原始 Invoker
+     * @return url 字符串
      */
     private String getCacheKey(final Invoker<?> originInvoker) {
         URL providerUrl = getProviderUrl(originInvoker);
@@ -456,8 +481,13 @@ public class RegistryProtocol implements Protocol {
      * @param <T>
      */
     private class ExporterChangeableWrapper<T> implements Exporter<T> {
-
+        /**
+         * 原 Invoker 对象
+         */
         private final Invoker<T> originInvoker;
+        /**
+         * 暴露的 Exporter 对象
+         */
         private Exporter<T> exporter;
 
         public ExporterChangeableWrapper(Exporter<T> exporter, Invoker<T> originInvoker) {
@@ -479,16 +509,21 @@ public class RegistryProtocol implements Protocol {
 
         public void unexport() {
             String key = getCacheKey(this.originInvoker);
-            bounds.remove(key);
-            exporter.unexport();
+            bounds.remove(key);// 移除出 `bounds`
+            exporter.unexport();// 取消暴露
         }
     }
 
     static private class DestroyableExporter<T> implements Exporter<T> {
 
         public static final ExecutorService executor = Executors.newSingleThreadExecutor(new NamedThreadFactory("Exporter-Unexport", true));
-
+        /**
+         * 暴露的 Exporter 对象
+         */
         private Exporter<T> exporter;
+        /**
+         * 原 Invoker 对象
+         */
         private Invoker<T> originInvoker;
         private URL subscribeUrl;
         private URL registerUrl;

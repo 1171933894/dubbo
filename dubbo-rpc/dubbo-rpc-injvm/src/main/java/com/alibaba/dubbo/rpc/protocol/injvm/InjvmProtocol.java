@@ -97,30 +97,42 @@ public class InjvmProtocol extends AbstractProtocol implements Protocol {
         return new InjvmExporter<T>(invoker, invoker.getUrl().getServiceKey(), exporterMap);
     }
 
+    // 创建 InjvmInvoker 对象。注意，传入的 exporterMap 参数，包含所有的 InjvmExporter 对象
     public <T> Invoker<T> refer(Class<T> serviceType, URL url) throws RpcException {
         return new InjvmInvoker<T>(serviceType, url, url.getServiceKey(), exporterMap);
     }
 
+    /**
+     * 是否本地引用
+     *
+     * @param url URL
+     * @return 是否
+     */
     public boolean isInjvmRefer(URL url) {
         final boolean isJvmRefer;
         String scope = url.getParameter(Constants.SCOPE_KEY);
         // Since injvm protocol is configured explicitly, we don't need to set any extra flag, use normal refer process.
+        // 当 `protocol = injvm` 时，本身已经是 jvm 协议了，走正常流程。
         if (Constants.LOCAL_PROTOCOL.toString().equals(url.getProtocol())) {
             isJvmRefer = false;
+        // 当 `scope = local` 或者 `injvm = true` 时，本地引用
         } else if (Constants.SCOPE_LOCAL.equals(scope) || (url.getParameter("injvm", false))) {
             // if it's declared as local reference
             // 'scope=local' is equivalent to 'injvm=true', injvm will be deprecated in the future release
             isJvmRefer = true;
+        // 当 `scope = remote` 时，远程引用
         } else if (Constants.SCOPE_REMOTE.equals(scope)) {
             // it's declared as remote reference
             isJvmRefer = false;
+        // 当 `generic = true` 时，即使用泛化调用，远程引用
         } else if (url.getParameter(Constants.GENERIC_KEY, false)) {
             // generic invocation is not local reference
             isJvmRefer = false;
+        // 当本地已经有该 Exporter 时，本地引用
         } else if (getExporter(exporterMap, url) != null) {
             // by default, go through local reference if there's the service exposed locally
             isJvmRefer = true;
-        } else {
+        } else {// 默认，远程引用
             isJvmRefer = false;
         }
         return isJvmRefer;
