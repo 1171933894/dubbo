@@ -58,6 +58,13 @@ import static org.springframework.core.annotation.AnnotationUtils.getAnnotation;
  *
  * @since 2.5.7
  */
+
+/**
+ * 继承 AnnotationInjectedBeanPostProcessor 抽象类，实现 ApplicationContextAware、ApplicationListener 接口，
+ * 扫描 @Reference 注解的类，创建对应的 Spring BeanDefinition 对象，从而创建 Dubbo Reference Bean 对象
+ *
+ * 注意：BeanPostProcessor 的抽象实现类，用于支持使用自定义注解，注入对象的属性。此时，ReferenceAnnotationBeanPostProcessor 实现的就是 支持 @Reference 注解的属性注入。
+ */
 public class ReferenceAnnotationBeanPostProcessor extends InstantiationAwareBeanPostProcessorAdapter
         implements MergedBeanDefinitionPostProcessor, PriorityOrdered, ApplicationContextAware, BeanClassLoaderAware,
         DisposableBean {
@@ -76,6 +83,7 @@ public class ReferenceAnnotationBeanPostProcessor extends InstantiationAwareBean
     private final ConcurrentMap<String, InjectionMetadata> injectionMetadataCache =
             new ConcurrentHashMap<String, InjectionMetadata>(256);
 
+    // ReferenceBean 缓存 Map
     private final ConcurrentMap<String, ReferenceBean<?>> referenceBeansCache =
             new ConcurrentHashMap<String, ReferenceBean<?>>();
 
