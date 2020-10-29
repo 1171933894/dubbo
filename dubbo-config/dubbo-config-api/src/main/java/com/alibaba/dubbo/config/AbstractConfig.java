@@ -45,6 +45,12 @@ import java.util.regex.Pattern;
  * 抽象配置类，除了 ArgumentConfig ，我们可以看到所有的配置类都继承该类
  *
  * AbstractConfig 主要提供配置解析与校验相关的工具方法。
+ *
+ * 目前提供了四种配置方式：
+ * 1 API 配置
+ * 2 属性配置
+ * 3 XML 配置
+ * 4 注解配置
  */
 public abstract class AbstractConfig implements Serializable {
 
