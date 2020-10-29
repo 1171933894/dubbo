@@ -24,12 +24,22 @@ import com.alibaba.dubbo.rpc.Invoker;
 /**
  * AbstractExporter.
  */
+
+/**
+ * 实现 Exporter 接口，Exporter 抽象类
+ */
 public abstract class AbstractExporter<T> implements Exporter<T> {
 
     protected final Logger logger = LoggerFactory.getLogger(getClass());
 
+    /**
+     * Invoker 对象
+     */
     private final Invoker<T> invoker;
 
+    /**
+     * 是否取消暴露服务
+     */
     private volatile boolean unexported = false;
 
     public AbstractExporter(Invoker<T> invoker) {

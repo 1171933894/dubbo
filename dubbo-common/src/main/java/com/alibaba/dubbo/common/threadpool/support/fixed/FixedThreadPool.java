@@ -33,17 +33,40 @@ import java.util.concurrent.TimeUnit;
  *
  * @see java.util.concurrent.Executors#newFixedThreadPool(int)
  */
+
+/**
+ * 目前只有服务提供者使用，配置方式如下：
+ *
+ * <dubbo:service interface="com.alibaba.dubbo.demo.DemoService" ref="demoService">
+ *
+ *     <dubbo:parameter key="threadname" value="shuaiqi" />
+ *     <dubbo:parameter key="threads" value="123" />
+ *     <dubbo:parameter key="queues" value="10" />
+ *
+ * </dubbo:service>
+ */
 public class FixedThreadPool implements ThreadPool {
 
     public Executor getExecutor(URL url) {
+        // 线程名
         String name = url.getParameter(Constants.THREAD_NAME_KEY, Constants.DEFAULT_THREAD_NAME);
+        // 线程数
         int threads = url.getParameter(Constants.THREADS_KEY, Constants.DEFAULT_THREADS);
+        // 队列数
         int queues = url.getParameter(Constants.QUEUES_KEY, Constants.DEFAULT_QUEUES);
+        // 创建执行器
+        /**
+         * 注意，根据不同的队列数，使用不同的队列实现：
+         * 1）queues == 0 ， SynchronousQueue 对象。
+         * 2）queues < 0 ， LinkedBlockingQueue 对象。
+         * 3）queues > 0 ，带队列数的 LinkedBlockingQueue 对象
+         */
         return new ThreadPoolExecutor(threads, threads, 0, TimeUnit.MILLISECONDS,
                 queues == 0 ? new SynchronousQueue<Runnable>() :
                         (queues < 0 ? new LinkedBlockingQueue<Runnable>()
                                 : new LinkedBlockingQueue<Runnable>(queues)),
-                new NamedThreadFactory(name, true), new AbortPolicyWithReport(name, url));
+                // 创建 NamedThreadFactory 对象，用于生成线程名
+                new NamedThreadFactory(name, true), new AbortPolicyWithReport(name, url));// 创建 AbortPolicyWithReport 对象，用于当任务添加到线程池中被拒绝时
     }
 
 }
