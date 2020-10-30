@@ -38,12 +38,22 @@ import java.lang.reflect.Constructor;
 /**
  * StubProxyFactoryWrapper
  */
+
+/**
+ * 实现 ProxyFactory 接口，Stub 代理工厂 Wrapper 实现类，基于 Dubbo SPI Wrapper 机制加载
+ *
+ * <dubbo:reference interface="com.alibaba.dubbo.demo.DemoService" stub="com.alibaba.dubbo.demo.consumer.DemoServiceStub">
+ */
 public class StubProxyFactoryWrapper implements ProxyFactory {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StubProxyFactoryWrapper.class);
-
+    /**
+     * ProxyFactory$Adaptive 对象
+     */
     private final ProxyFactory proxyFactory;
-
+    /**
+     * Protocol$Adaptive 对象
+     */
     private Protocol protocol;
 
     public StubProxyFactoryWrapper(ProxyFactory proxyFactory) {
@@ -56,12 +66,13 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T getProxy(Invoker<T> invoker) throws RpcException {
-        T proxy = proxyFactory.getProxy(invoker);
-        if (GenericService.class != invoker.getInterface()) {
+        T proxy = proxyFactory.getProxy(invoker);// 获得 Service Proxy 对象
+        if (GenericService.class != invoker.getInterface()) {// 非泛化引用
+            // 获得 `stub` 配置项
             String stub = invoker.getUrl().getParameter(Constants.STUB_KEY, invoker.getUrl().getParameter(Constants.LOCAL_KEY));
             if (ConfigUtils.isNotEmpty(stub)) {
                 Class<?> serviceType = invoker.getInterface();
-                if (ConfigUtils.isDefault(stub)) {
+                if (ConfigUtils.isDefault(stub)) {// `stub = true` 的情况，使用接口 + `Stub` 字符串。
                     if (invoker.getUrl().hasParameter(Constants.STUB_KEY)) {
                         stub = serviceType.getName() + "Stub";
                     } else {
@@ -69,11 +80,12 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
                     }
                 }
                 try {
-                    Class<?> stubClass = ReflectUtils.forName(stub);
+                    Class<?> stubClass = ReflectUtils.forName(stub);// 加载 Stub 类
                     if (!serviceType.isAssignableFrom(stubClass)) {
                         throw new IllegalStateException("The stub implementation class " + stubClass.getName() + " not implement interface " + serviceType.getName());
                     }
                     try {
+                        // 创建 Stub 对象，使用带 Service Proxy 对象的构造方法
                         Constructor<?> constructor = ReflectUtils.findConstructor(stubClass, serviceType);
                         proxy = (T) constructor.newInstance(new Object[]{proxy});
                         //export stub service

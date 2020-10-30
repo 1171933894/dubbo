@@ -134,20 +134,23 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
                     + " is DESTROYED, can not be invoked any more!");
         }
         RpcInvocation invocation = (RpcInvocation) inv;
-        invocation.setInvoker(this);
+        invocation.setInvoker(this);// 设置 `invoker` 属性
+        // 添加公用的隐式传参，例如，`path` `interface` 等等，详见 RpcInvocation 类
         if (attachment != null && attachment.size() > 0) {
             invocation.addAttachmentsIfAbsent(attachment);
         }
+        // 添加自定义的隐士传参
         Map<String, String> context = RpcContext.getContext().getAttachments();
         if (context != null) {
             invocation.addAttachmentsIfAbsent(context);
         }
+        // 设置 `async=true` ，若为异步方法
         if (getUrl().getMethodParameter(invocation.getMethodName(), Constants.ASYNC_KEY, false)) {
             invocation.setAttachment(Constants.ASYNC_KEY, Boolean.TRUE.toString());
         }
         RpcUtils.attachInvocationIdIfAsync(getUrl(), invocation);
 
-
+        // 执行调用
         try {
             return doInvoke(invocation);
         } catch (InvocationTargetException e) { // biz exception
@@ -171,6 +174,7 @@ public abstract class AbstractInvoker<T> implements Invoker<T> {
         }
     }
 
+    // 抽象方法，实现不同协议自定义的调用实现
     protected abstract Result doInvoke(Invocation invocation) throws Throwable;
 
 }

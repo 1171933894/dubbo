@@ -24,6 +24,10 @@ import com.alibaba.dubbo.common.extension.SPI;
 /**
  * ProxyFactory. (API/SPI, Singleton, ThreadSafe)
  */
+
+/**
+ * 代理工厂接口
+ */
 @SPI("javassist")
 public interface ProxyFactory {
 

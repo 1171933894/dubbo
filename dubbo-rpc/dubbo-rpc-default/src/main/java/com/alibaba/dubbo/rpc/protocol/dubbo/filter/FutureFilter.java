@@ -39,39 +39,61 @@ import java.util.concurrent.Future;
 /**
  * EventFilter
  */
-@Activate(group = Constants.CONSUMER)
+@Activate(group = Constants.CONSUMER)// @Activate(group = Constants.CONSUMER) 注解，基于 Dubbo SPI Activate 机制，只有服务消费者才生效该过滤器
 public class FutureFilter implements Filter {
 
     protected static final Logger logger = LoggerFactory.getLogger(FutureFilter.class);
 
     public Result invoke(final Invoker<?> invoker, final Invocation invocation) throws RpcException {
+        // 获得是否异步调用
         final boolean isAsync = RpcUtils.isAsync(invoker.getUrl(), invocation);
 
-        fireInvokeCallback(invoker, invocation);
+        fireInvokeCallback(invoker, invocation);// 触发前置方法
         // need to configure if there's return value before the invocation in order to help invoker to judge if it's
         // necessary to return future.
-        Result result = invoker.invoke(invocation);
-        if (isAsync) {
+        Result result = invoker.invoke(invocation);// 调用方法
+        // 触发回调方法
+        if (isAsync) {// 异步回调
             asyncCallback(invoker, invocation);
-        } else {
+        } else {// 同步回调
             syncCallback(invoker, invocation, result);
         }
         return result;
     }
 
+    /**
+     * 同步回调
+     *
+     * @param invoker    Invoker 对象
+     * @param invocation Invocation 对象
+     * @param result     RPC 结果
+     */
     private void syncCallback(final Invoker<?> invoker, final Invocation invocation, final Result result) {
         if (result.hasException()) {
-            fireThrowCallback(invoker, invocation, result.getException());
+            fireThrowCallback(invoker, invocation, result.getException());// 触发异常回调方法
         } else {
             fireReturnCallback(invoker, invocation, result.getValue());
         }
     }
 
+    /**
+     * 异步回调
+     *
+     * @param invoker    Invoker 对象
+     * @param invocation Invocation 对象
+     */
     private void asyncCallback(final Invoker<?> invoker, final Invocation invocation) {
+        // 获得 Future 对象
         Future<?> f = RpcContext.getContext().getFuture();
         if (f instanceof FutureAdapter) {
             ResponseFuture future = ((FutureAdapter<?>) f).getFuture();
+            // 触发回调
             future.setCallback(new ResponseCallback() {
+                /**
+                 * 触发正常回调方法
+                 *
+                 * @param rpcResult RPC 结果
+                 */
                 public void done(Object rpcResult) {
                     if (rpcResult == null) {
                         logger.error(new IllegalStateException("invalid result value : null, expected " + Result.class.getName()));
@@ -83,13 +105,17 @@ public class FutureFilter implements Filter {
                         return;
                     }
                     Result result = (Result) rpcResult;
-                    if (result.hasException()) {
+                    if (result.hasException()) {// 触发正常回调方法
                         fireThrowCallback(invoker, invocation, result.getException());
                     } else {
                         fireReturnCallback(invoker, invocation, result.getValue());
                     }
                 }
-
+                /**
+                 * 触发异常回调方法
+                 *
+                 * @param exception 异常
+                 */
                 public void caught(Throwable exception) {
                     fireThrowCallback(invoker, invocation, exception);
                 }
@@ -97,7 +123,11 @@ public class FutureFilter implements Filter {
         }
     }
 
+    /**
+     * 触发前置方法
+     */
     private void fireInvokeCallback(final Invoker<?> invoker, final Invocation invocation) {
+        // 获得前置方法和对象
         final Method onInvokeMethod = (Method) StaticContext.getSystemContext().get(StaticContext.getKey(invoker.getUrl(), invocation.getMethodName(), Constants.ON_INVOKE_METHOD_KEY));
         final Object onInvokeInst = StaticContext.getSystemContext().get(StaticContext.getKey(invoker.getUrl(), invocation.getMethodName(), Constants.ON_INVOKE_INSTANCE_KEY));
 
@@ -111,6 +141,7 @@ public class FutureFilter implements Filter {
             onInvokeMethod.setAccessible(true);
         }
 
+        // 调用前置方法
         Object[] params = invocation.getArguments();
         try {
             onInvokeMethod.invoke(onInvokeInst, params);
@@ -122,6 +153,7 @@ public class FutureFilter implements Filter {
     }
 
     private void fireReturnCallback(final Invoker<?> invoker, final Invocation invocation, final Object result) {
+        // 获得 `onreturn` 方法和对象
         final Method onReturnMethod = (Method) StaticContext.getSystemContext().get(StaticContext.getKey(invoker.getUrl(), invocation.getMethodName(), Constants.ON_RETURN_METHOD_KEY));
         final Object onReturnInst = StaticContext.getSystemContext().get(StaticContext.getKey(invoker.getUrl(), invocation.getMethodName(), Constants.ON_RETURN_INSTANCE_KEY));
 
@@ -163,10 +195,11 @@ public class FutureFilter implements Filter {
     }
 
     private void fireThrowCallback(final Invoker<?> invoker, final Invocation invocation, final Throwable exception) {
+        // 获得 `onthrow` 方法和对象
         final Method onthrowMethod = (Method) StaticContext.getSystemContext().get(StaticContext.getKey(invoker.getUrl(), invocation.getMethodName(), Constants.ON_THROW_METHOD_KEY));
         final Object onthrowInst = StaticContext.getSystemContext().get(StaticContext.getKey(invoker.getUrl(), invocation.getMethodName(), Constants.ON_THROW_INSTANCE_KEY));
 
-        //onthrow callback not configured
+        //onthrow callback not configured// 参数数组
         if (onthrowMethod == null && onthrowInst == null) {
             return;
         }
@@ -195,7 +228,7 @@ public class FutureFilter implements Filter {
                 } else {
                     params = new Object[]{exception};
                 }
-                onthrowMethod.invoke(onthrowInst, params);
+                onthrowMethod.invoke(onthrowInst, params);// 调用方法
             } catch (Throwable e) {
                 logger.error(invocation.getMethodName() + ".call back method invoke error . callback method :" + onthrowMethod + ", url:" + invoker.getUrl(), e);
             }

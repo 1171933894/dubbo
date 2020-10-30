@@ -28,6 +28,16 @@ import java.lang.reflect.Proxy;
 /**
  * JavaassistRpcProxyFactory
  */
+
+/**
+ * 如果使用 JDK 生成代理，配置方式如下：
+ *
+ * // 服务引用
+ * <dubbo:reference proxy="jdk" />
+ *
+ * // 服务暴露
+ * <dubbo:service proxy="jdk" />
+ */
 public class JdkProxyFactory extends AbstractProxyFactory {
 
     @SuppressWarnings("unchecked")
@@ -41,8 +51,8 @@ public class JdkProxyFactory extends AbstractProxyFactory {
             protected Object doInvoke(T proxy, String methodName,
                                       Class<?>[] parameterTypes,
                                       Object[] arguments) throws Throwable {
-                Method method = proxy.getClass().getMethod(methodName, parameterTypes);
-                return method.invoke(proxy, arguments);
+                Method method = proxy.getClass().getMethod(methodName, parameterTypes);// 获得方法
+                return method.invoke(proxy, arguments);// 调用方法
             }
         };
     }
