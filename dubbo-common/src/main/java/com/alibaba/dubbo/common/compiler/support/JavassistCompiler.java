@@ -35,90 +35,124 @@ import java.util.regex.Pattern;
 /**
  * JavassistCompiler. (SPI, Singleton, ThreadSafe)
  */
+
+/**
+ * Javassist 是一个开源的分析、编辑和创建 Java 字节码的类库。通过使用Javassist 对字节码操作可以实现动态 ”AOP” 框架。
+ *
+ * 关于 Java 字节码的处理，目前有很多工具，如 bcel，asm( cglib只是对asm又封装了一层 )。不过这些都需要直接跟虚拟机指令打交道。
+ *
+ * Javassist 的主要的优点，在于简单，而且快速，直接使用 Java 编码的形式，而不需要了解虚拟机指令，就能动态改变类的结构，或者动态生成类。
+ */
 public class JavassistCompiler extends AbstractCompiler {
 
+    /**
+     * 正则 - 匹配 import
+     */
     private static final Pattern IMPORT_PATTERN = Pattern.compile("import\\s+([\\w\\.\\*]+);\n");
 
+    /**
+     * 正则 - 匹配 extends
+     */
     private static final Pattern EXTENDS_PATTERN = Pattern.compile("\\s+extends\\s+([\\w\\.]+)[^\\{]*\\{\n");
 
+    /**
+     * 正则 - 匹配 implements
+     */
     private static final Pattern IMPLEMENTS_PATTERN = Pattern.compile("\\s+implements\\s+([\\w\\.]+)\\s*\\{\n");
 
+    /**
+     * 正则 - 匹配方法
+     */
     private static final Pattern METHODS_PATTERN = Pattern.compile("\n(private|public|protected)\\s+");
 
+    /**
+     * 正则 - 匹配变量
+     */
     private static final Pattern FIELD_PATTERN = Pattern.compile("[^\n]+=[^\n]+;");
 
     @Override
     public Class<?> doCompile(String name, String source) throws Throwable {
-        int i = name.lastIndexOf('.');
+        int i = name.lastIndexOf('.');// 获得类名
         String className = i < 0 ? name : name.substring(i + 1);
+        // 创建 ClassPool 对象
         ClassPool pool = new ClassPool(true);
+        // 设置类搜索路径
         pool.appendClassPath(new LoaderClassPath(ClassHelper.getCallerClassLoader(getClass())));
+        // 匹配 import
         Matcher matcher = IMPORT_PATTERN.matcher(source);
-        List<String> importPackages = new ArrayList<String>();
-        Map<String, String> fullNames = new HashMap<String, String>();
+        List<String> importPackages = new ArrayList<String>();// 引用的包名
+        Map<String, String> fullNames = new HashMap<String, String>();// 引用的类名
         while (matcher.find()) {
             String pkg = matcher.group(1);
-            if (pkg.endsWith(".*")) {
+            if (pkg.endsWith(".*")) {// 引用整个包下的类/接口
                 String pkgName = pkg.substring(0, pkg.length() - 2);
                 pool.importPackage(pkgName);
                 importPackages.add(pkgName);
-            } else {
+            } else {// 引用指定类/接口
                 int pi = pkg.lastIndexOf('.');
                 if (pi > 0) {
                     String pkgName = pkg.substring(0, pi);
                     pool.importPackage(pkgName);
                     importPackages.add(pkgName);
-                    fullNames.put(pkg.substring(pi + 1), pkg);
+                    fullNames.put(pkg.substring(pi + 1), pkg);// 类名
                 }
             }
         }
         String[] packages = importPackages.toArray(new String[0]);
+        // 匹配 extends
         matcher = EXTENDS_PATTERN.matcher(source);
         CtClass cls;
         if (matcher.find()) {
             String extend = matcher.group(1).trim();
             String extendClass;
-            if (extend.contains(".")) {
+            if (extend.contains(".")) {// 内嵌的类，例如：extends A.B
                 extendClass = extend;
             } else if (fullNames.containsKey(extend)) {
                 extendClass = fullNames.get(extend);
-            } else {
+            } else {// 引用整个包下的类
                 extendClass = ClassUtils.forName(packages, extend).getName();
             }
+            // 创建 CtClass 对象
             cls = pool.makeClass(name, pool.get(extendClass));
         } else {
+            // 创建 CtClass 对象
             cls = pool.makeClass(name);
         }
+        // 匹配 implements
         matcher = IMPLEMENTS_PATTERN.matcher(source);
         if (matcher.find()) {
             String[] ifaces = matcher.group(1).trim().split("\\,");
             for (String iface : ifaces) {
                 iface = iface.trim();
                 String ifaceClass;
-                if (iface.contains(".")) {
+                if (iface.contains(".")) {// 内嵌的接口，例如：extends A.B
                     ifaceClass = iface;
-                } else if (fullNames.containsKey(iface)) {
+                } else if (fullNames.containsKey(iface)) {// 指定引用的接口
                     ifaceClass = fullNames.get(iface);
-                } else {
+                } else {// 引用整个包下的接口
                     ifaceClass = ClassUtils.forName(packages, iface).getName();
                 }
+                // 添加接口
                 cls.addInterface(pool.get(ifaceClass));
             }
         }
+        // 获得类中的内容，即首末 {} 的内容。
         String body = source.substring(source.indexOf("{") + 1, source.length() - 1);
+        // 匹配 method 。使用分隔的方式，实际上，分隔出来的不仅仅有方法
         String[] methods = METHODS_PATTERN.split(body);
         for (String method : methods) {
             method = method.trim();
             if (method.length() > 0) {
-                if (method.startsWith(className)) {
+                if (method.startsWith(className)) {// 构造方法
                     cls.addConstructor(CtNewConstructor.make("public " + method, cls));
-                } else if (FIELD_PATTERN.matcher(method).matches()) {
+                } else if (FIELD_PATTERN.matcher(method).matches()) {// 变量
                     cls.addField(CtField.make("private " + method, cls));
-                } else {
+                } else {// 方法
                     cls.addMethod(CtNewMethod.make("public " + method, cls));
                 }
             }
         }
+        // 生成类
         return cls.toClass(ClassHelper.getCallerClassLoader(getClass()), JavassistCompiler.class.getProtectionDomain());
     }
 
