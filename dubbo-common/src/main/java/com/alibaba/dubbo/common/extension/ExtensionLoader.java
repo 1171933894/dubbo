@@ -916,6 +916,14 @@ public class ExtensionLoader<T> {
         // 编译代码，并返回该类
         ClassLoader classLoader = findClassLoader();
         com.alibaba.dubbo.common.compiler.Compiler compiler = ExtensionLoader.getExtensionLoader(com.alibaba.dubbo.common.compiler.Compiler.class).getAdaptiveExtension();
+        /**
+         * 调用 Compiler#compile(code, classLoader) 方法，编译代码，并返回该类。Compiler 基于 Dubbo SPI 机制进行加载，目前有两种实现：
+         *
+         * 1）JdkCompiler：<dubbo:application compiler="jdk" />
+         * 2）JavassistCompiler：<dubbo:application compiler="javassist" />
+         *
+         * 缺省使用 JavassistCompiler 。
+         */
         return compiler.compile(code, classLoader);
     }
 
