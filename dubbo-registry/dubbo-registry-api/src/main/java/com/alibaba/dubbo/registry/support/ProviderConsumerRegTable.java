@@ -29,10 +29,27 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @date 2017/11/23
  */
+
+/**
+ * 服务提供者和消费者注册表，存储 JVM 进程内自己的服务提供者和消费者的 Invoker
+ *
+ * 该信息用于 Dubbo QOS 使用，例如将 JVM 进程中，自己的服务提供者下线，又或者查询自己的服务提供者和消费者列表
+ */
 public class ProviderConsumerRegTable {
+    /**
+     * 服务提供者 Invoker 集合
+     *
+     * key：服务提供者 URL 服务键
+     */
     public static ConcurrentHashMap<String, Set<ProviderInvokerWrapper>> providerInvokers = new ConcurrentHashMap<String, Set<ProviderInvokerWrapper>>();
+    /**
+     * 服务消费者 Invoker 集合
+     *
+     * key：服务消费者 URL 服务键
+     */
     public static ConcurrentHashMap<String, Set<ConsumerInvokerWrapper>> consumerInvokers = new ConcurrentHashMap<String, Set<ConsumerInvokerWrapper>>();
 
+    // 注册 Provider Invoker
     public static void registerProvider(Invoker invoker, URL registryUrl, URL providerUrl) {
         ProviderInvokerWrapper wrapperInvoker = new ProviderInvokerWrapper(invoker, registryUrl, providerUrl);
         String serviceUniqueName = providerUrl.getServiceKey();
@@ -44,6 +61,7 @@ public class ProviderConsumerRegTable {
         invokers.add(wrapperInvoker);
     }
 
+    // 静态静态，获得指定服务键的 Provider Invoker 集合
     public static Set<ProviderInvokerWrapper> getProviderInvoker(String serviceUniqueName) {
         Set<ProviderInvokerWrapper> invokers = providerInvokers.get(serviceUniqueName);
         if (invokers == null) {
@@ -52,6 +70,7 @@ public class ProviderConsumerRegTable {
         return invokers;
     }
 
+    // 静态方法，获得服务提供者对应的 Invoker Wrapper 对象
     public static ProviderInvokerWrapper getProviderWrapper(Invoker invoker) {
         URL providerUrl = invoker.getUrl();
         if (Constants.REGISTRY_PROTOCOL.equals(providerUrl.getProtocol())) {

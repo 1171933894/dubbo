@@ -73,6 +73,12 @@ import java.util.concurrent.ConcurrentHashMap;
  * 格式为 protocol://username:password@host:port/path?key=value&key=value，示例如：
  * dubbo://192.168.3.17:20880/com.alibaba.dubbo.demo.DemoService?anyhost=true&application=demo-provider&default.delay=-1&default.retries=0&default.service.filter=demoFilter&delay=-1&dubbo=2.0.0&generic=false&interface=com.alibaba.dubbo.demo.DemoService&methods=sayHello&pid=19031&side=provider&timestamp=1519651641799
  * parameters 属性，参数集合。从上面的 Service URL 例子我们可以看到，里面的 key=value ，实际上就是 Service 对应的配置项。该属性，通过 AbstractConfig#appendParameters(parameters, config, prefix) 方法生成。
+ *
+ * 在 URL.parameters.category 属性上，表示订阅的数据分类。目前有四种类型：
+ * 1）consumers ，服务消费者列表。
+ * 2）providers ，服务提供者列表。
+ * 3）routers ，路由规则列表。
+ * 4）configurations ，配置规则列表。
  */
 public final class URL implements Serializable {
 
