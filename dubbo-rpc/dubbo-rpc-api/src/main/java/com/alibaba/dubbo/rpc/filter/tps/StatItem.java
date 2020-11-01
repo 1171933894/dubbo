@@ -22,15 +22,23 @@ import com.alibaba.dubbo.rpc.Invocation;
 import java.util.concurrent.atomic.AtomicInteger;
 
 class StatItem {
-
+    /**
+     * 统计名，目前使用服务名
+     */
     private String name;
 
     private long lastResetTime;
-
+    /**
+     * 周期
+     */
     private long interval;
-
+    /**
+     * 当前周期，剩余种子数
+     */
     private AtomicInteger token;
-
+    /**
+     * 限制大小
+     */
     private int rate;
 
     StatItem(String name, int rate, long interval) {
@@ -42,12 +50,14 @@ class StatItem {
     }
 
     public boolean isAllowable(URL url, Invocation invocation) {
+        // 若到达下一个周期，恢复可用种子数，设置最后重置时间。
         long now = System.currentTimeMillis();
         if (now > lastResetTime + interval) {
-            token.set(rate);
-            lastResetTime = now;
+            token.set(rate);// 回复可用种子数
+            lastResetTime = now;// 最后重置时间
         }
 
+        // CAS ，直到或得到一个种子，或者没有足够种子
         int value = token.get();
         boolean flag = false;
         while (value > 0 && !flag) {
@@ -55,7 +65,7 @@ class StatItem {
             value = token.get();
         }
 
-        return flag;
+        return flag;// 是否成功
     }
 
     long getLastResetTime() {

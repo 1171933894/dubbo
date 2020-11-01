@@ -25,6 +25,12 @@ import java.util.Map;
 /**
  * ThreadLocalCache
  */
+
+/**
+ * 基于 ThreadLocal 实现，相当于一个线程，一个 ThreadLocalCache 对象
+ *
+ * ThreadLocalCache 目前没有过期或清理机制，所以需要注意
+ */
 public class ThreadLocalCache implements Cache {
 
     private final ThreadLocal<Map<Object, Object>> store;

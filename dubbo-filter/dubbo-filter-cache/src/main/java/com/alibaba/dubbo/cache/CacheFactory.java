@@ -23,10 +23,16 @@ import com.alibaba.dubbo.common.extension.SPI;
 /**
  * CacheFactory
  */
-@SPI("lru")
+@SPI("lru")// @SPI("lru") 注解，Dubbo SPI 拓展点，默认为 "lru"
 public interface CacheFactory {
 
-    @Adaptive("cache")
+    /**
+     * 获得缓存对象
+     *
+     * @param url URL 对象
+     * @return 缓存对象
+     */
+    @Adaptive("cache")// 基于 Dubbo SPI Adaptive 机制，加载对应的 Cache 实现，使用 URL.cache 属性
     Cache getCache(URL url);
 
 }

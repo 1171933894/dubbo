@@ -36,5 +36,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface MethodValidated {
+    /**
+     * 分组集合：当调用某个方法时，需要检查多个分组，可以在接口方法上加上该注解。
+     *
+     * @MethodValidated({Save.class, Update.class})
+     * void relatedQuery(ValidationParameter parameter);
+     */
     Class<?>[] value() default {};
 }

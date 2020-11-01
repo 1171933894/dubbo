@@ -34,7 +34,11 @@ import com.alibaba.dubbo.rpc.RpcResult;
  */
 @Activate(group = {Constants.CONSUMER, Constants.PROVIDER}, value = Constants.CACHE_KEY)
 public class CacheFilter implements Filter {
-
+    /**
+     * CacheFactory$Adaptive 对象
+     *
+     * 通过 Dubbo SPI 机制，调用 {@link #setCacheFactory(CacheFactory)} 方法，进行注入
+     */
     private CacheFactory cacheFactory;
 
     public void setCacheFactory(CacheFactory cacheFactory) {
@@ -42,16 +46,20 @@ public class CacheFilter implements Filter {
     }
 
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        // 方法开启 Cache 功能
         if (cacheFactory != null && ConfigUtils.isNotEmpty(invoker.getUrl().getMethodParameter(invocation.getMethodName(), Constants.CACHE_KEY))) {
+            // 基于 URL + Method 为维度，获得 Cache 对象
             Cache cache = cacheFactory.getCache(invoker.getUrl().addParameter(Constants.METHOD_KEY, invocation.getMethodName()));
             if (cache != null) {
+                // 获得 Cache Key
                 String key = StringUtils.toArgumentString(invocation.getArguments());
+                // 从缓存中获得结果。若存在，创建 RpcResult 对象
                 Object value = cache.get(key);
                 if (value != null) {
                     return new RpcResult(value);
                 }
-                Result result = invoker.invoke(invocation);
-                if (!result.hasException()) {
+                Result result = invoker.invoke(invocation);// 服务调用
+                if (!result.hasException()) {// 若非异常结果，缓存结果
                     cache.put(key, result.getValue());
                 }
                 return result;

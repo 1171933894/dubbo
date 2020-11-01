@@ -72,29 +72,37 @@ import java.util.Set;
 public class JValidator implements Validator {
 
     private static final Logger logger = LoggerFactory.getLogger(JValidator.class);
-
+    /**
+     * 服务接口类
+     */
     private final Class<?> clazz;
-
+    /**
+     * Validator 对象
+     */
     private final javax.validation.Validator validator;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public JValidator(URL url) {
+        // 获得服务接口类
         this.clazz = ReflectUtils.forName(url.getServiceInterface());
+        // 获得 `"jvalidation"` 配置项
         String jvalidation = url.getParameter("jvalidation");
+        // 获得 ValidatorFactory 对象
         ValidatorFactory factory;
-        if (jvalidation != null && jvalidation.length() > 0) {
+        if (jvalidation != null && jvalidation.length() > 0) {// 指定实现
             factory = Validation.byProvider((Class) ReflectUtils.forName(jvalidation)).configure().buildValidatorFactory();
-        } else {
+        } else {// 默认
             factory = Validation.buildDefaultValidatorFactory();
         }
+        // 获得 javax Validator 对象
         this.validator = factory.getValidator();
     }
 
     private static boolean isPrimitives(Class<?> cls) {
-        if (cls.isArray()) {
+        if (cls.isArray()) {// [] 数组，使用内部的类来判断
             return isPrimitive(cls.getComponentType());
         }
-        return isPrimitive(cls);
+        return isPrimitive(cls);// 直接判断
     }
 
     private static boolean isPrimitive(Class<?> cls) {
@@ -234,7 +242,9 @@ public class JValidator implements Validator {
     }
 
     public void validate(String methodName, Class<?>[] parameterTypes, Object[] arguments) throws Exception {
+        // 验证分组集合
         List<Class<?>> groups = new ArrayList<Class<?>>();
+        // 【第一种】添加以方法命名的内部接口，作为验证分组。例如 `ValidationService#save(...)` 方法，对应 `ValidationService.Save` 接口
         String methodClassName = clazz.getName() + "$" + toUpperMethoName(methodName);
         Class<?> methodClass = null;
         try {
@@ -243,6 +253,7 @@ public class JValidator implements Validator {
         } catch (ClassNotFoundException e) {
         }
         Set<ConstraintViolation<?>> violations = new HashSet<ConstraintViolation<?>>();
+        // 【第二种】添加方法的 @MethodValidated 注解的值对应的类，作为验证分组
         Method method = clazz.getMethod(methodName, parameterTypes);
         Class<?>[] methodClasses = null;
         if (method.isAnnotationPresent(MethodValidated.class)){
@@ -250,21 +261,25 @@ public class JValidator implements Validator {
             groups.addAll(Arrays.asList(methodClasses));
         }
         // add into default group
+        // 【第三种】添加 Default.class 类，作为验证分组。在 JSR 303 中，未设置分组的验证注解，使用 Default.class 。
         groups.add(0, Default.class);
+        // 【第四种】添加服务接口类，作为验证分组
         groups.add(1, clazz);
 
         // convert list to array
         Class<?>[] classgroups = groups.toArray(new Class[0]);
-
+        // 【第一步】获得方法参数的 Bean 对象。因为，JSR 303 是 Java Bean Validation ，以 Bean 为维度。
         Object parameterBean = getMethodParameterBean(clazz, method, arguments);
+        // 【第一步】验证 Bean 对象
         if (parameterBean != null) {
             violations.addAll(validator.validate(parameterBean, classgroups ));
         }
-
+        // 【第二步】验证集合参数
         for (Object arg : arguments) {
             validate(violations, arg, classgroups);
         }
 
+        // 若有错误，抛出 ConstraintViolationException 异常
         if (violations.size() > 0) {
             logger.error("Failed to validate service: " + clazz.getName() + ", method: " + methodName + ", cause: " + violations);
             throw new ConstraintViolationException("Failed to validate service: " + clazz.getName() + ", method: " + methodName + ", cause: " + violations, violations);
@@ -274,19 +289,22 @@ public class JValidator implements Validator {
     private void validate(Set<ConstraintViolation<?>> violations, Object arg, Class<?>... groups) {
         if (arg != null && !isPrimitives(arg.getClass())) {
             if (Object[].class.isInstance(arg)) {
+                // [] 数组
                 for (Object item : (Object[]) arg) {
-                    validate(violations, item, groups);
+                    validate(violations, item, groups);// 单个元素
                 }
             } else if (Collection.class.isInstance(arg)) {
+                // Collection
                 for (Object item : (Collection<?>) arg) {
-                    validate(violations, item, groups);
+                    validate(violations, item, groups);// 单个元素
                 }
             } else if (Map.class.isInstance(arg)) {
+                // Map
                 for (Map.Entry<?, ?> entry : ((Map<?, ?>) arg).entrySet()) {
-                    validate(violations, entry.getKey(), groups);
-                    validate(violations, entry.getValue(), groups);
+                    validate(violations, entry.getKey(), groups);// 单个元素
+                    validate(violations, entry.getValue(), groups);// 单个元素
                 }
-            } else {
+            } else {// 单个元素
                 violations.addAll(validator.validate(arg, groups));
             }
         }

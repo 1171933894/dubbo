@@ -24,10 +24,16 @@ import com.alibaba.dubbo.common.extension.SPI;
 /**
  * Validation
  */
-@SPI("jvalidation")
+@SPI("jvalidation")// Dubbo SPI 拓展点，默认为 "jvalidation"
 public interface Validation {
 
-    @Adaptive(Constants.VALIDATION_KEY)
+    /**
+     * 获得 Validator 对象
+     *
+     * @param url URL
+     * @return Validator
+     */
+    @Adaptive(Constants.VALIDATION_KEY)// 基于 Dubbo SPI Adaptive 机制，加载对应的 Validator 实现，使用 URL.validation 属性
     Validator getValidator(URL url);
 
 }

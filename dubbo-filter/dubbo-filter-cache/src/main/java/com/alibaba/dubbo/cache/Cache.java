@@ -19,10 +19,29 @@ package com.alibaba.dubbo.cache;
 /**
  * Cache
  */
-public interface Cache {
 
+/**
+ * Cache 是个缓存容器，内部可以管理缓存的键值
+ *
+ * 1）lru ：基于最近最少使用原则删除多余缓存，保持最热的数据被缓存。
+ * 2）threadlocal ：当前线程缓存，比如一个页面渲染，用到很多 portal，每个 portal 都要去查用户信息，通过线程缓存，可以减少这种多余访问。
+ * 3）jcache ：与 JSR107 集成，可以桥接各种缓存实现。
+ */
+public interface Cache {
+    /**
+     * 添加键值
+     *
+     * @param key   键
+     * @param value 值
+     */
     void put(Object key, Object value);
 
+    /**
+     * 获得值
+     *
+     * @param key 键
+     * @return 值
+     */
     Object get(Object key);
 
 }
