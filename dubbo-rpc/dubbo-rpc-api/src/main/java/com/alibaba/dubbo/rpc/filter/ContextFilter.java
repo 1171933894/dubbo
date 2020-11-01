@@ -36,7 +36,9 @@ import java.util.Map;
 public class ContextFilter implements Filter {
 
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
+        // 创建新的 `attachments` 集合，清理公用的隐式参数
         Map<String, String> attachments = invocation.getAttachments();
+        // 在此过滤器(例如rest协议)之前，我们可能已经在RpcContext中添加了一些附件。
         if (attachments != null) {
             attachments = new HashMap<String, String>(attachments);
             attachments.remove(Constants.PATH_KEY);
@@ -45,20 +47,24 @@ public class ContextFilter implements Filter {
             attachments.remove(Constants.DUBBO_VERSION_KEY);
             attachments.remove(Constants.TOKEN_KEY);
             attachments.remove(Constants.TIMEOUT_KEY);
-            attachments.remove(Constants.ASYNC_KEY);// Remove async property to avoid being passed to the following invoke chain.
+            attachments.remove(Constants.ASYNC_KEY);// Remove async property to avoid being passed to the following invoke chain.// 清空消费端的异步参数
         }
+        // 设置 RpcContext 对象
         RpcContext.getContext()
                 .setInvoker(invoker)
                 .setInvocation(invocation)
                 .setAttachments(attachments)
                 .setLocalAddress(invoker.getUrl().getHost(),
                         invoker.getUrl().getPort());
+        // 设置 RpcInvocation 对象的 `invoker` 属性
         if (invocation instanceof RpcInvocation) {
             ((RpcInvocation) invocation).setInvoker(invoker);
         }
         try {
+            // 服务调用
             return invoker.invoke(invocation);
         } finally {
+            // 移除上下文
             RpcContext.removeContext();
         }
     }
