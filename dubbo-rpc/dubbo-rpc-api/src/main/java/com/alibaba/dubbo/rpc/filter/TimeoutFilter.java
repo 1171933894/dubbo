@@ -42,11 +42,11 @@ public class TimeoutFilter implements Filter {
 
     public Result invoke(Invoker<?> invoker, Invocation invocation) throws RpcException {
         long start = System.currentTimeMillis();
-        Result result = invoker.invoke(invocation);
-        long elapsed = System.currentTimeMillis() - start;
+        Result result = invoker.invoke(invocation);// 服务调用
+        long elapsed = System.currentTimeMillis() - start;// 计算调用时长
         if (invoker.getUrl() != null
                 && elapsed > invoker.getUrl().getMethodParameter(invocation.getMethodName(),
-                "timeout", Integer.MAX_VALUE)) {
+                "timeout", Integer.MAX_VALUE)) {// 超过时长，打印告警日志
             if (logger.isWarnEnabled()) {
                 logger.warn("invoke time out. method: " + invocation.getMethodName()
                         + " arguments: " + Arrays.toString(invocation.getArguments()) + " , url is "
