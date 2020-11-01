@@ -28,10 +28,15 @@ import com.alibaba.dubbo.rpc.RpcResult;
 /**
  * EchoInvokerFilter
  */
+
+/**
+ * 实现 Filter 接口，回声过滤器
+ */
 @Activate(group = Constants.PROVIDER, order = -110000)
 public class EchoFilter implements Filter {
 
     public Result invoke(Invoker<?> invoker, Invocation inv) throws RpcException {
+        // 方法名为 `$echo` ，参数只有一个
         if (inv.getMethodName().equals(Constants.$ECHO) && inv.getArguments() != null && inv.getArguments().length == 1)
             return new RpcResult(inv.getArguments()[0]);
         return invoker.invoke(inv);
