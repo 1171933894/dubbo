@@ -25,7 +25,7 @@ import com.alibaba.dubbo.remoting.transport.dispatcher.all.AllDispatcher;
 /**
  * ChannelHandlerWrapper (SPI, Singleton, ThreadSafe)
  */
-@SPI(AllDispatcher.NAME)
+@SPI(AllDispatcher.NAME)// Dubbo SPI 拓展点，默认为 "all"
 public interface Dispatcher {
 
     /**

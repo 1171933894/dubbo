@@ -28,6 +28,10 @@ import java.net.InetSocketAddress;
  * @see com.alibaba.dubbo.remoting.Client
  * @see com.alibaba.dubbo.remoting.Server
  */
+
+/**
+ * 在 dubbo-remoting-api 中，一个 Client 或 Server ，都是一个 Endpoint
+ */
 public interface Endpoint {
 
     /**

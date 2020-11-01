@@ -35,14 +35,14 @@ public interface Server extends Endpoint, Resetable {
      *
      * @return bound
      */
-    boolean isBound();
+    boolean isBound();// 是否绑定本地端口，提供服务。即，是否启动成功，可连接，接收消息等
 
     /**
      * get channels.
      *
      * @return channels
      */
-    Collection<Channel> getChannels();
+    Collection<Channel> getChannels();// 获得连接上服务器的通道（客户端）们
 
     /**
      * get channel.
@@ -52,7 +52,7 @@ public interface Server extends Endpoint, Resetable {
      */
     Channel getChannel(InetSocketAddress remoteAddress);
 
-    @Deprecated
+    @Deprecated// com.alibaba.dubbo.common.Resetable 用于根据新传入的 url 属性，重置自己内部的一些属性
     void reset(com.alibaba.dubbo.common.Parameters parameters);
 
 }
