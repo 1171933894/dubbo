@@ -31,6 +31,13 @@ import java.net.InetSocketAddress;
 /**
  * AbstractCodec
  */
+
+/**
+ * #checkPayload(channel, size) 静态方法，校验消息长度。
+ * #getSerialization(channel) 方法，获得 Serialization 对象。
+ * #isClientSide(channel) 方法，是否为客户端侧的通道。
+ * #isServerSide(channel) 方法，是否为服务端侧的通道。
+ */
 public abstract class AbstractCodec implements Codec2 {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractCodec.class);

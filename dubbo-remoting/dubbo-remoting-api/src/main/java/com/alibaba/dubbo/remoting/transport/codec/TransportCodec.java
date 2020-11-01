@@ -35,8 +35,10 @@ import java.io.OutputStream;
 public class TransportCodec extends AbstractCodec {
 
     public void encode(Channel channel, ChannelBuffer buffer, Object message) throws IOException {
+        // 获得反序列化的 ObjectOutput 对象
         OutputStream output = new ChannelBufferOutputStream(buffer);
         ObjectOutput objectOutput = getSerialization(channel).serialize(channel.getUrl(), output);
+        // 写入 ObjectOutput
         encodeData(channel, objectOutput, message);
         objectOutput.flushBuffer();
     }

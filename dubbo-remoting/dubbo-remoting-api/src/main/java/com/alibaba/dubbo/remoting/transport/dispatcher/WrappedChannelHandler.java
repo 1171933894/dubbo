@@ -36,19 +36,24 @@ public class WrappedChannelHandler implements ChannelHandlerDelegate {
 
     protected static final Logger logger = LoggerFactory.getLogger(WrappedChannelHandler.class);
 
+    /**
+     * 内置的共享线程池
+     */
     protected static final ExecutorService SHARED_EXECUTOR = Executors.newCachedThreadPool(new NamedThreadFactory("DubboSharedHandler", true));
 
-    protected final ExecutorService executor;
+    protected final ExecutorService executor;// 线程池
 
-    protected final ChannelHandler handler;
+    protected final ChannelHandler handler;// 通道处理器
 
-    protected final URL url;
+    protected final URL url;// URL
 
     public WrappedChannelHandler(ChannelHandler handler, URL url) {
         this.handler = handler;
         this.url = url;
+        // 创建线程池
         executor = (ExecutorService) ExtensionLoader.getExtensionLoader(ThreadPool.class).getAdaptiveExtension().getExecutor(url);
 
+        // 添加线程池到 DataStore 中
         String componentKey = Constants.EXECUTOR_SERVICE_COMPONENT_KEY;
         if (Constants.CONSUMER_SIDE.equalsIgnoreCase(url.getParameter(Constants.SIDE_KEY))) {
             componentKey = Constants.CONSUMER_SIDE;

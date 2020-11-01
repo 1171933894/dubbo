@@ -25,7 +25,7 @@ import com.alibaba.dubbo.rpc.cluster.Directory;
  * {@link FailbackClusterInvoker}
  *
  */
-public class FailbackCluster implements Cluster {
+public class FailbackCluster implements Cluster {// failback：退回
 
     public final static String NAME = "failback";
 

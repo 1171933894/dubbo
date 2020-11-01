@@ -33,7 +33,7 @@ import java.util.List;
  *
  * @see com.alibaba.dubbo.rpc.cluster.Cluster#join(Directory)
  */
-@SPI(RandomLoadBalance.NAME)
+@SPI(RandomLoadBalance.NAME)// Dubbo SPI 拓展点，默认为 "random" ，即随机
 public interface LoadBalance {
 
     /**
@@ -44,7 +44,17 @@ public interface LoadBalance {
      * @param invocation invocation.
      * @return selected invoker.
      */
-    @Adaptive("loadbalance")
+    /**
+     * select one invoker in list.
+     * <p>
+     * 从 Invoker 集合中，选择一个
+     *
+     * @param invokers   invokers.
+     * @param url        refer url
+     * @param invocation invocation.
+     * @return selected invoker.
+     */
+    @Adaptive("loadbalance")// 基于 Dubbo SPI Adaptive 机制，加载对应的 Cluster 实现，使用 URL.loadbalance 属性
     <T> Invoker<T> select(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException;
 
 }

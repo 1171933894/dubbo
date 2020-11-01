@@ -25,6 +25,10 @@ import com.alibaba.dubbo.rpc.cluster.Directory;
  * {@link FailfastClusterInvoker}
  *
  */
+
+/**
+ * 实现 Cluster 接口，快速失败，只发起一次调用，失败立即报错。通常用于非幂等性的写操作，比如新增记录
+ */
 public class FailfastCluster implements Cluster {
 
     public final static String NAME = "failfast";

@@ -23,6 +23,10 @@ import com.alibaba.dubbo.remoting.RemotingException;
 /**
  * ChannelHandlerAdapter.
  */
+
+/**
+ * 实现 ChannelHandler 接口，通道处理器适配器，每个方法为空实现
+ */
 public class ChannelHandlerAdapter implements ChannelHandler {
 
     public void connected(Channel channel) throws RemotingException {

@@ -34,11 +34,11 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractEndpoint.class);
 
-    private Codec2 codec;
+    private Codec2 codec;// 编解码器
 
-    private int timeout;
+    private int timeout;// 超时时间
 
-    private int connectTimeout;
+    private int connectTimeout;// 连接超时时间
 
     public AbstractEndpoint(URL url, ChannelHandler handler) {
         super(url, handler);

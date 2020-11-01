@@ -27,28 +27,51 @@ import java.util.Random;
  * random load balance.
  *
  */
+
+/**
+ * 实现 AbstractLoadBalance 抽象类，随机，按权重设置随机概率
+ */
 public class RandomLoadBalance extends AbstractLoadBalance {
 
     public static final String NAME = "random";
 
     private final Random random = new Random();
 
+    /**
+     * 假定有3台dubbo provider:
+     *
+     * 10.0.0.1:20884, weight=2
+     * 10.0.0.1:20886, weight=3
+     * 10.0.0.1:20888, weight=4
+     * 随机算法的实现：
+     * totalWeight=9;
+     *
+     * 假设offset=1（即random.nextInt(9)=1）
+     * 1-2=-1<0？是，所以选中 10.0.0.1:20884, weight=2
+     * 假设offset=4（即random.nextInt(9)=4）
+     * 4-2=2<0？否，这时候offset=2， 2-3<0？是，所以选中 10.0.0.1:20886, weight=3
+     * 假设offset=7（即random.nextInt(9)=7）
+     * 7-2=5<0？否，这时候offset=5， 5-3=2<0？否，这时候offset=2， 2-4<0？是，所以选中 10.0.0.1:20888, weight=4
+     */
     protected <T> Invoker<T> doSelect(List<Invoker<T>> invokers, URL url, Invocation invocation) {
         int length = invokers.size(); // Number of invokers
         int totalWeight = 0; // The sum of weights
         boolean sameWeight = true; // Every invoker has the same weight?
         for (int i = 0; i < length; i++) {
-            int weight = getWeight(invokers.get(i), invocation);
+            int weight = getWeight(invokers.get(i), invocation);// 获得权重
             totalWeight += weight; // Sum
             if (sameWeight && i > 0
                     && weight != getWeight(invokers.get(i - 1), invocation)) {
                 sameWeight = false;
             }
         }
+        // 权重不相等，随机后，判断在哪个 Invoker 的权重区间中
         if (totalWeight > 0 && !sameWeight) {
             // If (not every invoker has the same weight & at least one invoker's weight>0), select randomly based on totalWeight.
+            // 随机
             int offset = random.nextInt(totalWeight);
             // Return a invoker based on the random value.
+            // 区间判断
             for (int i = 0; i < length; i++) {
                 offset -= getWeight(invokers.get(i), invocation);
                 if (offset < 0) {
@@ -57,7 +80,7 @@ public class RandomLoadBalance extends AbstractLoadBalance {
             }
         }
         // If all invokers have the same weight value or totalWeight=0, return evenly.
-        return invokers.get(random.nextInt(length));
+        return invokers.get(random.nextInt(length));// 权重相等，平均随机
     }
 
 }

@@ -30,6 +30,11 @@ import java.util.List;
  *
  * @see com.alibaba.dubbo.rpc.cluster.Cluster#join(Directory)
  */
+
+/**
+ * 定义了两个接口方法，分别返回服务的类型和 Invoker 集合。
+ *  一个 Directory 只对应一个服务类型。
+ */
 public interface Directory<T> extends Node {
 
     /**
@@ -37,10 +42,24 @@ public interface Directory<T> extends Node {
      *
      * @return service type.
      */
+    /**
+     * get service type.
+     *
+     * 获得服务类型，例如：com.alibaba.dubbo.demo.DemoService
+     *
+     * @return service type.
+     */
     Class<T> getInterface();
 
     /**
      * list invokers.
+     *
+     * @return invokers
+     */
+    /**
+     * list invokers.
+     *
+     * 获得所有服务 Invoker 集合
      *
      * @return invokers
      */
