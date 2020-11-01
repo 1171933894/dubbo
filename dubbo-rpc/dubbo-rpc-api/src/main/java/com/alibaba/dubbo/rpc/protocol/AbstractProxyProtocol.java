@@ -103,11 +103,15 @@ public abstract class AbstractProxyProtocol extends AbstractProtocol {
 
     public <T> Invoker<T> refer(final Class<T> type, final URL url) throws RpcException {
         final Invoker<T> tagert = proxyFactory.getInvoker(doRefer(type, url), type, url);
+        // 执行引用服务
         Invoker<T> invoker = new AbstractInvoker<T>(type, url) {
+            // 创建 Invoker 对象
             @Override
             protected Result doInvoke(Invocation invocation) throws Throwable {
                 try {
+                    // 调用
                     Result result = tagert.invoke(invocation);
+                    // 若返回结果带有异常，并且需要抛出，则抛出异常
                     Throwable e = result.getException();
                     if (e != null) {
                         for (Class<?> rpcException : rpcExceptions) {
@@ -118,19 +122,23 @@ public abstract class AbstractProxyProtocol extends AbstractProtocol {
                     }
                     return result;
                 } catch (RpcException e) {
+                    // 若是未知异常，获得异常对应的错误码
                     if (e.getCode() == RpcException.UNKNOWN_EXCEPTION) {
                         e.setCode(getErrorCode(e.getCause()));
                     }
                     throw e;
                 } catch (Throwable e) {
+                    // 抛出 RpcException 异常
                     throw getRpcException(type, url, invocation, e);
                 }
             }
         };
+        // 添加到 Invoker 集合
         invokers.add(invoker);
         return invoker;
     }
 
+    // 包装成 RpcException 异常
     protected RpcException getRpcException(Class<?> type, URL url, Invocation invocation, Throwable e) {
         RpcException re = new RpcException("Failed to invoke remote service: " + type + ", method: "
                 + invocation.getMethodName() + ", cause: " + e.getMessage(), e);
