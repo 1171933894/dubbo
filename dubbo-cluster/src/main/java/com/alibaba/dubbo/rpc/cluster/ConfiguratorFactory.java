@@ -24,7 +24,7 @@ import com.alibaba.dubbo.common.extension.SPI;
  * ConfiguratorFactory. (SPI, Singleton, ThreadSafe)
  *
  */
-@SPI
+@SPI// Dubbo SPI 拓展点，无默认值
 public interface ConfiguratorFactory {
 
     /**
@@ -33,7 +33,7 @@ public interface ConfiguratorFactory {
      * @param url - configurator url.
      * @return configurator instance.
      */
-    @Adaptive("protocol")
+    @Adaptive("protocol")// 基于 Dubbo SPI Adaptive 机制，加载对应的 Configurator 实现，使用 URL.protocol 属性
     Configurator getConfigurator(URL url);
 
 }

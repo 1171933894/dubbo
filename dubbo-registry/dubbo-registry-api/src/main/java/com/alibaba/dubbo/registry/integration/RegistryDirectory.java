@@ -191,26 +191,44 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
      *             </br>4.override://0.0.0.0/ without parameters means clearing the override
      * @return
      */
+    /**
+     * 将overrideURL 转换为 map，供重新 refer 时使用.
+     * 每次下发全部规则，全部重新组装计算
+     *
+     * @param urls 契约：
+     *             </br>1.override://0.0.0.0/...(或override://ip:port...?anyhost=true)&para1=value1...表示全局规则(对所有的提供者全部生效)
+     *             </br>2.override://ip:port...?anyhost=false 特例规则（只针对某个提供者生效）
+     *             </br>3.不支持override://规则... 需要注册中心自行计算.
+     *             </br>4.不带参数的override://0.0.0.0/ 表示清除override
+     * @return Configurator 集合
+     */
     public static List<Configurator> toConfigurators(List<URL> urls) {
+        // 忽略，若配置规则 URL 集合为空
         if (urls == null || urls.size() == 0) {
             return Collections.emptyList();
         }
 
+        // 创建 Configurator 集合
         List<Configurator> configurators = new ArrayList<Configurator>(urls.size());
         for (URL url : urls) {
+            // 若协议为 `empty://` ，意味着清空所有配置规则，因此返回空 Configurator 集合
             if (Constants.EMPTY_PROTOCOL.equals(url.getProtocol())) {
                 configurators.clear();
                 break;
             }
+            // 对应第 4 条契约，不带参数的 override://0.0.0.0/ 表示清除 override
             Map<String, String> override = new HashMap<String, String>(url.getParameters());
             //The anyhost parameter of override may be added automatically, it can't change the judgement of changing url
+            // override 上的 anyhost 可能是自动添加的，不能影响改变url判断
             override.remove(Constants.ANYHOST_KEY);
             if (override.size() == 0) {
                 configurators.clear();
                 continue;
             }
+            // 获得 Configurator 对象，并添加到 `configurators` 中
             configurators.add(configuratorFactory.getConfigurator(url));
         }
+        // 排序
         Collections.sort(configurators);
         return configurators;
     }
@@ -492,8 +510,10 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
      * @return
      */
     private URL mergeUrl(URL providerUrl) {
+        // 合并消费端参数
         providerUrl = ClusterUtils.mergeUrl(providerUrl, queryMap); // Merge the consumer side parameters
 
+        // 合并配置规则
         List<Configurator> localConfigurators = this.configurators; // local reference
         if (localConfigurators != null && localConfigurators.size() > 0) {
             for (Configurator configurator : localConfigurators) {
@@ -501,11 +521,14 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
             }
         }
 
+        // 不检查连接是否成功，总是创建 Invoker ！
         providerUrl = providerUrl.addParameter(Constants.CHECK_KEY, String.valueOf(false)); // Do not check whether the connection is successful or not, always create Invoker!
 
         // The combination of directoryUrl and override is at the end of notify, which can't be handled here
+        // 仅合并提供者参数，因为 directoryUrl 与 override 合并是在 notify 的最后，这里不能够处理
         this.overrideDirectoryUrl = this.overrideDirectoryUrl.addParametersIfAbsent(providerUrl.getParameters()); // Merge the provider side parameters
 
+        // 【忽略】因为是对 1.0 版本的兼容
         if ((providerUrl.getPath() == null || providerUrl.getPath().length() == 0)
                 && "dubbo".equals(providerUrl.getProtocol())) { // Compatible version 1.0
             //fix by tony.chenl DUBBO-44
@@ -522,6 +545,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
                 providerUrl = providerUrl.setPath(path);
             }
         }
+        // 返回服务提供者 URL
         return providerUrl;
     }
 
