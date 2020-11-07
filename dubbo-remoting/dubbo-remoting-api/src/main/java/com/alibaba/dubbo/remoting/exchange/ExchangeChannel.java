@@ -31,7 +31,7 @@ public interface ExchangeChannel extends Channel {
      * @return response future
      * @throws RemotingException
      */
-    ResponseFuture request(Object request) throws RemotingException;
+    ResponseFuture request(Object request) throws RemotingException;// 发送请求
 
     /**
      * send request.
@@ -48,13 +48,13 @@ public interface ExchangeChannel extends Channel {
      *
      * @return message handler
      */
-    ExchangeHandler getExchangeHandler();
+    ExchangeHandler getExchangeHandler();// 获得信息交换处理器
 
     /**
      * graceful close.
      *
      * @param timeout
      */
-    void close(int timeout);
+    void close(int timeout);// 优雅关闭
 
 }
