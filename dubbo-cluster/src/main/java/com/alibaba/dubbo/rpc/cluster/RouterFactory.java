@@ -29,7 +29,7 @@ import com.alibaba.dubbo.rpc.Invocation;
  * @see com.alibaba.dubbo.rpc.cluster.Cluster#join(Directory)
  * @see com.alibaba.dubbo.rpc.cluster.Directory#list(Invocation)
  */
-@SPI
+@SPI// 注解，Dubbo SPI 拓展点，无默认值
 public interface RouterFactory {
 
     /**
@@ -38,7 +38,15 @@ public interface RouterFactory {
      * @param url
      * @return router
      */
-    @Adaptive("protocol")
+    /**
+     * Create router.
+     *
+     * 创建 Router 对象
+     *
+     * @param url
+     * @return router
+     */
+    @Adaptive("protocol")// 注解，基于 Dubbo SPI Adaptive 机制，加载对应的 Router 实现，使用 URL.protocol 属性
     Router getRouter(URL url);
 
 }

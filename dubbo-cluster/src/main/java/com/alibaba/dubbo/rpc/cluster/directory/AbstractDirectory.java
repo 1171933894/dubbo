@@ -110,10 +110,19 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         return routers;
     }
 
+    /**
+     * 设置路由规则
+     *
+     * <dubbo:registry id="zk01" address="zookeeper://127.0.0.1:2181">
+     *     <dubbo:parameter key="router" value="file" />
+     *     <dubbo:parameter key="rule" value="/Users/yunai/xxx.js" />
+     * </dubbo:registry>
+     */
     protected void setRouters(List<Router> routers) {
-        // copy list
+        // copy list // 复制 routers ，因为下面要修改
         routers = routers == null ? new ArrayList<Router>() : new ArrayList<Router>(routers);
         // append url router
+        // 拼接 `url` 中，配置的路由规则
         String routerkey = url.getParameter(Constants.ROUTER_KEY);
         if (routerkey != null && routerkey.length() > 0) {
             RouterFactory routerFactory = ExtensionLoader.getExtensionLoader(RouterFactory.class).getExtension(routerkey);
@@ -121,7 +130,9 @@ public abstract class AbstractDirectory<T> implements Directory<T> {
         }
         // append mock invoker selector
         routers.add(new MockInvokersSelector());
+        // 排序
         Collections.sort(routers);
+        // 赋值给属性
         this.routers = routers;
     }
 

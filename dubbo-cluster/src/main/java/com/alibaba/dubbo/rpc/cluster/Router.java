@@ -31,12 +31,19 @@ import java.util.List;
  * @see com.alibaba.dubbo.rpc.cluster.Cluster#join(Directory)
  * @see com.alibaba.dubbo.rpc.cluster.Directory#list(Invocation)
  */
+
+/**
+ * 实现 Comparable 接口，路由规则接口
+ */
 public interface Router extends Comparable<Router> {
 
     /**
      * get the router url.
      *
      * @return url
+     */
+    /**
+     * 路由规则 URL
      */
     URL getUrl();
 
@@ -47,6 +54,17 @@ public interface Router extends Comparable<Router> {
      * @param url        refer url
      * @param invocation
      * @return routed invokers
+     * @throws RpcException
+     */
+    /**
+     * route.
+     *
+     * 路由，筛选匹配的 Invoker 集合
+     *
+     * @param invokers   Invoker 集合
+     * @param url        refer url
+     * @param invocation
+     * @return routed invokers 路由后的 Invoker 集合
      * @throws RpcException
      */
     <T> List<Invoker<T>> route(List<Invoker<T>> invokers, URL url, Invocation invocation) throws RpcException;
