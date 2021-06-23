@@ -47,6 +47,18 @@ import java.io.InputStream;
  */
 public class ExchangeCodec extends TelnetCodec {
 
+    /**
+     * Header 部分，协议头，通过 Codec 编解码。Bits 位如下：
+     * [0, 15]：Magic Number
+     * [16, 20]：Serialization 编号。
+     * [21]：event 是否为事件。
+     * [22]：twoWay 是否需要响应。
+     * [23]：是请求还是响应。
+     * [24 - 31]：status 状态。
+     * [32 - 95]：id 编号，Long 型。
+     * [96 - 127]：Body 的长度。通过该长度，读取 Body 。
+     * Body 部分，协议体，通过 Serialization 序列化/反序列化
+     */
     // header length.
     protected static final int HEADER_LENGTH = 16;
     // magic header.
@@ -205,20 +217,25 @@ public class ExchangeCodec extends TelnetCodec {
 
     protected void encodeRequest(Channel channel, ChannelBuffer buffer, Request req) throws IOException {
         Serialization serialization = getSerialization(channel);
+        // `[0, 15]`：Magic Number
         // header.
         byte[] header = new byte[HEADER_LENGTH];
         // set magic number.
         Bytes.short2bytes(MAGIC, header);
-
+        // `[16, 20]`：Serialization 编号 && `[23]`：请求。
         // set request and serialization flag.
         header[2] = (byte) (FLAG_REQUEST | serialization.getContentTypeId());
 
+        // `[21]`：`event` 是否为事件。
         if (req.isTwoWay()) header[2] |= FLAG_TWOWAY;
+        // `[22]`：`twoWay` 是否需要响应。
         if (req.isEvent()) header[2] |= FLAG_EVENT;
 
+        // `[32 - 95]`：`id` 编号，Long 型。
         // set request id.
         Bytes.long2bytes(req.getId(), header, 4);
 
+        // 编码 `Request.data` 到 Body ，并写入到 Buffer
         // encode request data.
         int savedWriteIndex = buffer.writerIndex();
         buffer.writerIndex(savedWriteIndex + HEADER_LENGTH);
@@ -229,13 +246,17 @@ public class ExchangeCodec extends TelnetCodec {
         } else {
             encodeRequestData(channel, out, req.getData());
         }
+        // 释放资源
         out.flushBuffer();
         bos.flush();
         bos.close();
         int len = bos.writtenBytes();
+        // 检查 Body 长度，是否超过消息上限。
         checkPayload(channel, len);
+        // `[96 - 127]`：Body 的**长度**。
         Bytes.int2bytes(len, header, 12);
 
+        // 写入 Header 到 Buffer
         // write
         buffer.writerIndex(savedWriteIndex);
         buffer.writeBytes(header); // write header.
