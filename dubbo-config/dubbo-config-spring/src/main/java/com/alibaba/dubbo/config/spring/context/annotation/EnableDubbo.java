@@ -31,6 +31,13 @@ import java.lang.annotation.*;
  * @see EnableDubboConfig
  * @since 2.5.8
  */
+
+/**
+ * 通过 @EnableDubbo 可以在指定的包名下（通过 scanBasePackages 属性），或者指定的类中（通过 scanBasePackageClasses 属性）
+ * 扫描 Dubbo 的服务提供者（以 @Service 注解）以及 Dubbo 的服务消费者（以 @Reference 注解）。
+ *
+ * 扫描到 Dubbo 的服务提供方和消费者之后，对其做相应的组装并初始化，并最终完成服务暴露或者引用的工作。
+ */
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
