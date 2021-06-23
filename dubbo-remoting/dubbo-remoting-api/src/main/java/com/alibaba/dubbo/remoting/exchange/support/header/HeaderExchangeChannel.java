@@ -33,7 +33,7 @@ import com.alibaba.dubbo.remoting.exchange.support.DefaultFuture;
 import java.net.InetSocketAddress;
 
 /**
- * ExchangeReceiver
+ * ExchangeReceiver 实现 ExchangeChannel 接口，基于消息头部( Header )的信息交换通道实现类
  */
 final class HeaderExchangeChannel implements ExchangeChannel {
 
