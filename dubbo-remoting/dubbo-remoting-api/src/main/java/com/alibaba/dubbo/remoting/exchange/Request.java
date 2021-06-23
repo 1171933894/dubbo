@@ -35,6 +35,9 @@ public class Request {
 
     private String mVersion;
 
+    /**
+     * // 无需响应标识
+     */
     private boolean mTwoWay = true;
 
     private boolean mEvent = false;

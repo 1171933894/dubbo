@@ -122,12 +122,17 @@ public class HeaderExchangeServer implements ExchangeServer {
         server.startClose();
     }
 
+    /**
+     * #sendChannelReadOnlyEvent() 方法，广播客户端，READONLY_EVENT 事件
+     */
     private void sendChannelReadOnlyEvent() {
+        // 创建 READONLY_EVENT 请求
         Request request = new Request();
         request.setEvent(Request.READONLY_EVENT);
-        request.setTwoWay(false);
+        request.setTwoWay(false);// 无需响应
         request.setVersion(Version.getVersion());
 
+        // 发送给所有 Client
         Collection<Channel> channels = getChannels();
         for (Channel channel : channels) {
             try {
