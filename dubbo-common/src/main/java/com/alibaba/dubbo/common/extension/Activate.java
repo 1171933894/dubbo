@@ -39,6 +39,13 @@ import java.lang.annotation.Target;
  * @see URL
  * @see ExtensionLoader
  */
+
+/**
+ * 分成过滤条件和排序信息两类属性
+ *
+ * 对于可以被框架中自动激活加载扩展，@Activate 用于配置扩展被自动激活加载条件。
+ * 比如，Filter 扩展，有多个实现，使用 @Activate 的扩展可以根据条件被自动加载。
+ */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD})

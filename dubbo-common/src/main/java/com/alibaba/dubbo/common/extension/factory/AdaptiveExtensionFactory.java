@@ -42,6 +42,9 @@ public class AdaptiveExtensionFactory implements ExtensionFactory {
          */
         ExtensionLoader<ExtensionFactory> loader = ExtensionLoader.getExtensionLoader(ExtensionFactory.class);
         List<ExtensionFactory> list = new ArrayList<ExtensionFactory>();
+        /**
+         * 使用 ExtensionLoader 加载 ExtensionFactory 拓展对象的实现类。若胖友没自己实现 ExtensionFactory 的情况下，factories 为 SpiExtensionFactory 和 SpringExtensionFactory
+         */
         for (String name : loader.getSupportedExtensions()) {
             list.add(loader.getExtension(name));
         }

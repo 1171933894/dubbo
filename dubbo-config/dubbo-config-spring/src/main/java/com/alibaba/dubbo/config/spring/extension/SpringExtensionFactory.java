@@ -23,7 +23,7 @@ import org.springframework.context.ApplicationContext;
 import java.util.Set;
 
 /**
- * SpringExtensionFactory
+ * SpringExtensionFactory（从这里可以看出来，不写配置文件也是可以）
  */
 public class SpringExtensionFactory implements ExtensionFactory {
 

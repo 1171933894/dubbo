@@ -56,17 +56,38 @@ import java.util.regex.Pattern;
  * @see com.alibaba.dubbo.common.extension.Adaptive
  * @see com.alibaba.dubbo.common.extension.Activate
  */
+
+/**
+ *
+ * Dubbo 改进了 JDK 标准的 SPI 的以下问题：
+ *
+ * 1）JDK 标准的 SPI 会一次性实例化扩展点所有实现，如果有扩展实现初始化很耗时，但如果没用上也加载，会很浪费资源。
+ * 2）如果扩展点加载失败，连扩展点的名称都拿不到了。比如：JDK 标准的 ScriptEngine，通过 getName() 获取脚本类型的名称，但如果 RubyScriptEngine 因为所依赖的 jruby.jar 不存在，导致 RubyScriptEngine 类加载失败，这个失败原因被吃掉了，和 ruby 对应不起来，当用户执行 ruby 脚本时，会报不支持 ruby，而不是真正失败的原因。
+ * 3）增加了对扩展点 IoC 和 AOP 的支持，一个扩展点可以直接 setter 注入其它扩展点。
+ *
+ */
 public class ExtensionLoader<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(ExtensionLoader.class);
 
+    /**
+     * Java SPI 的配置目录，我们会看到 Dubbo SPI 对 Java SPI 做了兼容
+     */
     private static final String SERVICES_DIRECTORY = "META-INF/services/";
 
+    /**
+     * 用于用户自定义的拓展实现
+     */
     private static final String DUBBO_DIRECTORY = "META-INF/dubbo/";
 
+    /**
+     * 从名字上可以看出，用于 Dubbo 内部提供的拓展实现
+     */
     private static final String DUBBO_INTERNAL_DIRECTORY = DUBBO_DIRECTORY + "internal/";
 
     private static final Pattern NAME_SEPARATOR = Pattern.compile("\\s*[,]+\\s*");
+
+    // ============================== 静态属性 ==============================
 
     /**
      * 拓展加载器集合
@@ -86,7 +107,7 @@ public class ExtensionLoader<T> {
      */
     private static final ConcurrentMap<Class<?>, Object> EXTENSION_INSTANCES = new ConcurrentHashMap<Class<?>, Object>();
 
-    // ==============================
+    // ============================== 静态属性 ==============================
 
     /**
      * 我们将属性分成了两类：1）静态属性；2）对象属性。这是为啥呢？
@@ -273,6 +294,7 @@ public class ExtensionLoader<T> {
      * @return extension list which are activated.
      * @see #getActivateExtension(com.alibaba.dubbo.common.URL, String[], String)
      */
+    // 获得符合自动激活条件的拓展对象数组
     public List<T> getActivateExtension(URL url, String key, String group) {
         // 从 Dubbo URL 获得参数值
         String value = url.getParameter(key);
@@ -639,7 +661,15 @@ public class ExtensionLoader<T> {
             }
             // 注入依赖的属性
             injectExtension(instance);
-            // 创建 Wrapper 拓展对象
+            // 创建 Wrapper 拓展对象（将 instance 包装在其中）
+            /**
+             * Wrapper 类同样实现了扩展点接口，但是 Wrapper 不是扩展点的真正实现。它的用途主要是用于从 ExtensionLoader 返回扩展点时，包装在真正的扩展点实现外。
+             * 即从 ExtensionLoader 中返回的实际上是 Wrapper 类的实例，Wrapper 持有了实际的扩展点实现类。
+             *
+             * 扩展点的 Wrapper 类可以有多个，也可以根据需要新增。
+             *
+             * 通过 Wrapper 类可以把所有扩展点公共逻辑移至 Wrapper 中。新加的 Wrapper 在所有的扩展点上添加了逻辑，有些类似 AOP，即 Wrapper 代理了扩展点。
+             */
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
             if (wrapperClasses != null && wrapperClasses.size() > 0) {
                 for (Class<?> wrapperClass : wrapperClasses) {
@@ -712,6 +742,11 @@ public class ExtensionLoader<T> {
                 classes = cachedClasses.get();
                 if (classes == null) {
                     // 从配置文件中，加载拓展实现类数组
+                    /**
+                     * 它不包含如下两种类型的拓展实现：
+                     * 1）自适应拓展实现类。例如 AdaptiveExtensionFactory 。拓展 Adaptive 实现类，会添加到 cachedAdaptiveClass 属性中。
+                     * 2）带唯一参数为拓展接口的构造方法的实现类，或者说拓展 Wrapper 实现类。例如，ProtocolFilterWrapper 。拓展 Wrapper 实现类，会添加到 cachedWrapperClasses 属性中。
+                     */
                     classes = loadExtensionClasses();
                     // 设置到缓存中
                     cachedClasses.set(classes);
@@ -741,6 +776,9 @@ public class ExtensionLoader<T> {
         }
 
         // 从配置文件中，加载拓展实现类数组
+        /**
+         * 注意，此处配置文件的加载顺序。
+         */
         Map<String, Class<?>> extensionClasses = new HashMap<String, Class<?>>();
         loadFile(extensionClasses, DUBBO_INTERNAL_DIRECTORY);
         loadFile(extensionClasses, DUBBO_DIRECTORY);
@@ -771,7 +809,7 @@ public class ExtensionLoader<T> {
                 while (urls.hasMoreElements()) {
                     java.net.URL url = urls.nextElement();
                     try {
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(url.openStream(), "utf-8"));// 注意：这里指定了UTF-8
                         try {
                             String line = null;
                             while ((line = reader.readLine()) != null) {
@@ -901,9 +939,11 @@ public class ExtensionLoader<T> {
 
     private Class<?> getAdaptiveExtensionClass() {
         getExtensionClasses();
+        // 如果有类被标记了 @Adaptive 的就直接使用
         if (cachedAdaptiveClass != null) {
             return cachedAdaptiveClass;
         }
+        // 否则就通过过javasist生成代理类
         return cachedAdaptiveClass = createAdaptiveExtensionClass();
     }
 
