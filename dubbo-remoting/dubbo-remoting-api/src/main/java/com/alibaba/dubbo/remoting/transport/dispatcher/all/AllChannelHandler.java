@@ -32,6 +32,8 @@ import java.util.concurrent.RejectedExecutionException;
 
 /**
  * WrappedChannelHandler 是实现 ChannelHandlerDelegate 的抽象类
+ *
+ * 创建 ChannelEventRunnable 对象，提交给线程池执行。不同的实现方法，对应不同的状态
  */
 public class AllChannelHandler extends WrappedChannelHandler {
 

@@ -27,6 +27,10 @@ public class AllDispatcher implements Dispatcher {
 
     public static final String NAME = "all";
 
+    /**
+     * AllChannelHandler 也是 ChannelHandlerDelegate 类型。
+     * 也就是说“线程模型”，也是通过装饰器模式，组合而成
+     */
     public ChannelHandler dispatch(ChannelHandler handler, URL url) {
         return new AllChannelHandler(handler, url);
     }

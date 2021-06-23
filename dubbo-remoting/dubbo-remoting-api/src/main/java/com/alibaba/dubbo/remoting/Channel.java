@@ -27,7 +27,10 @@ import java.net.InetSocketAddress;
  * @see com.alibaba.dubbo.remoting.Server#getChannels()
  * @see com.alibaba.dubbo.remoting.Server#getChannel(InetSocketAddress)
  */
+// 继承 Endpoint 接口，通道接口
 public interface Channel extends Endpoint {
+
+    // ---------- 连接相关 ----------
 
     /**
      * get remote address.
@@ -42,6 +45,8 @@ public interface Channel extends Endpoint {
      * @return connected
      */
     boolean isConnected();
+
+    // ---------- 属性相关 ----------
 
     /**
      * has attribute.

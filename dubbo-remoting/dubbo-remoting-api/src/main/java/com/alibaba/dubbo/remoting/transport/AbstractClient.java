@@ -44,7 +44,7 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
- * AbstractClient
+ * 继承 AbstractEndpoint 抽象类，客户端抽象类，重点实现了公用的重连逻辑，同时抽象了连接等模板方法，供子类实现
  */
 public abstract class AbstractClient extends AbstractEndpoint implements Client {
 

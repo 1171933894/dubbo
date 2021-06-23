@@ -57,6 +57,9 @@ public abstract class AbstractEndpoint extends AbstractPeer implements Resetable
         }
     }
 
+    /**
+     * 使用新的 url 属性，可重置 codec timeout connectTimeout 属性
+     */
     public void reset(URL url) {
         if (isClosed()) {
             throw new IllegalStateException("Failed to reset parameters "

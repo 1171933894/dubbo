@@ -60,8 +60,8 @@ public abstract class AbstractServer extends AbstractEndpoint implements Server 
         if (url.getParameter(Constants.ANYHOST_KEY, false) || NetUtils.isInvalidLocalHost(bindIp)) {
             bindIp = NetUtils.ANYHOST;
         }
-        bindAddress = new InetSocketAddress(bindIp, bindPort);// 服务器最大可接受连接数
-        this.accepts = url.getParameter(Constants.ACCEPTS_KEY, Constants.DEFAULT_ACCEPTS);
+        bindAddress = new InetSocketAddress(bindIp, bindPort);
+        this.accepts = url.getParameter(Constants.ACCEPTS_KEY, Constants.DEFAULT_ACCEPTS);// 服务器最大可接受连接数
         this.idleTimeout = url.getParameter(Constants.IDLE_TIMEOUT_KEY, Constants.DEFAULT_IDLE_TIMEOUT);// 空闲超时时间
         // 开启服务器
         try {
