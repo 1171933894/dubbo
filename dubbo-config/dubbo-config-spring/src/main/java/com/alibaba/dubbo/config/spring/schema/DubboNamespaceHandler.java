@@ -23,7 +23,7 @@ import com.alibaba.dubbo.config.spring.ServiceBean;
 import org.springframework.beans.factory.xml.NamespaceHandlerSupport;
 
 /**
- * DubboNamespaceHandler
+ * DubboNamespaceHandler（Dubbo 的 XML Namespace 的处理器）
  *
  * @export
  */

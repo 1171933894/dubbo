@@ -112,6 +112,9 @@ public final class URL implements Serializable {
     private final String path;
     /**
      * 参数集合
+     *
+     * parameters 属性，参数集合。从上面的 Service URL 例子我们可以看到，里面的 key=value ，
+     * 实际上就是 Service 对应的配置项。该属性，通过 AbstractConfig#appendParameters(parameters, config, prefix) 方法生成
      */
     private final Map<String, String> parameters;
 
@@ -1176,6 +1179,9 @@ public final class URL implements Serializable {
         }
     }
 
+    /**
+     * 格式为 protocol://username:password@host:port/path?key=value&key=value ，通过 URL#buildString(...) 方法生成
+     */
     private String buildString(boolean appendUser, boolean appendParameter, String... parameters) {
         return buildString(appendUser, appendParameter, false, false, parameters);
     }

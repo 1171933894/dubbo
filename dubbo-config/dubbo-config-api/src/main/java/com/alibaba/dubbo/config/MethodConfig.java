@@ -50,7 +50,7 @@ public class MethodConfig extends AbstractMethodConfig {
     private Integer executes;
 
     // if it's deprecated
-    private Boolean deprecated;
+    private Boolean deprecated;// deprecated：已弃用
 
     // whether to enable sticky
     private Boolean sticky;
