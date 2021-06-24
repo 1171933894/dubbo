@@ -113,7 +113,7 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
      * @throws RpcExceptione
      */
     /**
-     * 使用 loadbalance 选择 invoker.
+     * 从候选的 Invoker 集合，选择一个最终调用的 Invoker 对象
      *
      * @param loadbalance Loadbalance 对象，提供负责均衡策略
      * @param invocation  Invocation 对象
@@ -163,6 +163,24 @@ public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
         // If we only have two invokers, use round-robin instead.
         // 【第二种】如果只有两个 Invoker ，退化成轮循
         if (invokers.size() == 2 && selected != null && selected.size() > 0) {
+            /**
+             * 这里退化成轮询的实现有问题，对应源码return selected.get(0) == invokers.get(0) ? invokers.get(1) : invokers.get(0)；如果retries=4，即最多调用5次，且两个可选invoke分别为：
+             *
+             * 10.0.0.1:20884，10.0.0.1:20886；
+             *
+             * 那么5次选择的invoke为：
+             *
+             * 10.0.0.1:20884
+             * 10.0.0.1:20886
+             * 10.0.0.1:20886
+             * 10.0.0.1:20886
+             * 10.0.0.1:20886，
+             * 即除了第1次外后面的选择都是选择第二个invoker;
+             *
+             * 因次需要把selected.get(0)修改为：selected.get(selected.size()-1)；
+             *
+             * 即每次拿前一次选择的invoker与 invokers.get(0)比较，如果相同，则选则另一个invoker；否则就选 invokers.get(0)；
+             */
             return selected.get(0) == invokers.get(0) ? invokers.get(1) : invokers.get(0);
         }
         // 【第三种】使用 Loadbalance ，选择一个 Invoker 对象。
