@@ -37,12 +37,20 @@ import java.lang.reflect.Constructor;
 
 /**
  * StubProxyFactoryWrapper
+ *
+ * 【dubbo的本地存根的原理】
+ * 远程服务后，客户端通常只剩下接口，而实现全在服务器端，但提供方有些时候想在客户端也执行部分逻辑，那么就在服务
+ * 消费者这一端提供了一个Stub类，然后当消费者调用provider方提供的dubbo服务时，客户端生成 Proxy 实例，这个Proxy实例就是我们正常调用dubbo
+ * 远程服务要生成的代理实例，然后消费者这方会把 Proxy 通过构造函数传给 消费者方的Stub ，然后把 Stub 暴露给用户，Stub 可以决定要不要去调Proxy。
+ * 会通过代理类去完成这个调用，这样在Stub类中，就可以做一些额外的事，来对服务的调用过程进行优化或者容错的处理。附图：
  */
 
 /**
  * 实现 ProxyFactory 接口，Stub 代理工厂 Wrapper 实现类，基于 Dubbo SPI Wrapper 机制加载
  *
  * <dubbo:reference interface="com.alibaba.dubbo.demo.DemoService" stub="com.alibaba.dubbo.demo.consumer.DemoServiceStub">
+ *
+ * 注意：服务实现的 Service ，不支持 Stub 存根。所以，虽然 <dubbo:service /> 有 stub 配置项，但是实际是没有效果的
  */
 public class StubProxyFactoryWrapper implements ProxyFactory {
 
@@ -67,7 +75,7 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <T> T getProxy(Invoker<T> invoker) throws RpcException {
         T proxy = proxyFactory.getProxy(invoker);// 获得 Service Proxy 对象
-        if (GenericService.class != invoker.getInterface()) {// 非泛化引用
+        if (GenericService.class != invoker.getInterface()) {// 非泛化引用（若是泛化引用，不支持使用本地存根）
             // 获得 `stub` 配置项
             String stub = invoker.getUrl().getParameter(Constants.STUB_KEY, invoker.getUrl().getParameter(Constants.LOCAL_KEY));
             if (ConfigUtils.isNotEmpty(stub)) {
@@ -87,7 +95,7 @@ public class StubProxyFactoryWrapper implements ProxyFactory {
                     try {
                         // 创建 Stub 对象，使用带 Service Proxy 对象的构造方法
                         Constructor<?> constructor = ReflectUtils.findConstructor(stubClass, serviceType);
-                        proxy = (T) constructor.newInstance(new Object[]{proxy});
+                        proxy = (T) constructor.newInstance(new Object[]{proxy});// 核心逻辑
                         //export stub service
                         URL url = invoker.getUrl();
                         if (url.getParameter(Constants.STUB_EVENT_KEY, Constants.DEFAULT_STUB_EVENT)) {
