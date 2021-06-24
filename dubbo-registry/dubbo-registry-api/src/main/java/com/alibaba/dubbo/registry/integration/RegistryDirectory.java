@@ -242,7 +242,8 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     }
 
     public void subscribe(URL url) {
-        setConsumerUrl(url);// 设置消费者 URL
+        // 设置消费者 URL
+        setConsumerUrl(url);
         // 向注册中心，发起订阅
         registry.subscribe(url, this);
     }

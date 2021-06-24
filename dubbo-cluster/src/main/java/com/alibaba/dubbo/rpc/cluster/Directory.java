@@ -32,8 +32,12 @@ import java.util.List;
  */
 
 /**
- * 定义了两个接口方法，分别返回服务的类型和 Invoker 集合。
- *  一个 Directory 只对应一个服务类型。
+ * 定义了两个接口方法，分别返回服务的类型和 Invoker 集合。一个 Directory 只对应一个服务类型。
+ * 中文直译为目录，代表了多个 Invoker ，可以把它看成 List<Invoker> 。但与 List 不同的是，
+ * 它的值可能是动态变化的，比如注册中心推送变更
+ *
+ * StaticDirectory ，静态 Directory 实现类，从命名上看出它是静态的 List<Invoker> 。
+ * RegistryDirectory ，基于注册中心的动态 Directory 实现类，从命名上看出它是动态的，会根据注册中心的推送变更 List<Invoker> 。
  */
 public interface Directory<T> extends Node {
 
