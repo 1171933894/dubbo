@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 /**
  * AbstractClusterInvoker
  *
+ * Invoker 类的代理模式变形
  */
 public abstract class AbstractClusterInvoker<T> implements Invoker<T> {
 

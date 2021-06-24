@@ -30,7 +30,10 @@ import java.util.List;
 
 /**
  * BroadcastClusterInvoker
- *
+ */
+
+/**
+ * 广播调用所有提供者，逐个调用，任意一台报错则报错。通常用于通知所有提供者更新缓存或日志等本地资源信息
  */
 public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
 
@@ -62,7 +65,7 @@ public class BroadcastClusterInvoker<T> extends AbstractClusterInvoker<T> {
                 exception = new RpcException(e.getMessage(), e);
                 logger.warn(e.getMessage(), e);
             }
-        }
+        }// 【注意】没有终止调用，每个都会调用到
         // 若存在一个异常，抛出该异常
         if (exception != null) {
             throw exception;
