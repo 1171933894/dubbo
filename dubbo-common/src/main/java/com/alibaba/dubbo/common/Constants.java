@@ -307,7 +307,7 @@ public class Constants {
 
     public static final String SUBSCRIBE_KEY = "subscribe";
 
-    public static final String GROUP_KEY = "group";
+    public static final String GROUP_KEY = "group";// 可以简单理解为：获得 Zookeeper 根节点
 
     public static final String PATH_KEY = "path";
 

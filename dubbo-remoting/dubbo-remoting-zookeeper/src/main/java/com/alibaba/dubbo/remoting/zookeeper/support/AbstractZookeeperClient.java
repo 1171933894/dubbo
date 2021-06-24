@@ -151,10 +151,14 @@ public abstract class AbstractZookeeperClient<TargetChildListener> implements Zo
 
     protected abstract boolean checkExists(String path);
 
+    // 创建真正的 ChildListener 对象。
+    // 因为，每个 Zookeeper 的库，实现不同
     protected abstract TargetChildListener createTargetChildListener(String path, ChildListener listener);
 
+    // 向 Zookeeper ，真正发起订阅
     protected abstract List<String> addTargetChildListener(String path, TargetChildListener listener);
 
+    // 向 Zookeeper ，真正发起取消订阅
     protected abstract void removeTargetChildListener(String path, TargetChildListener listener);
 
 }

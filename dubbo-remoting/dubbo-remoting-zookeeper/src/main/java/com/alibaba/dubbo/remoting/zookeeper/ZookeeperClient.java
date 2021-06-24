@@ -24,6 +24,21 @@ import java.util.List;
  * Zookeeper 客户端接口
  */
 // 从 API 上，Dubbo 只使用节点的路径，而不使用节点的值（内容）
+
+/**
+ * 状态相关方法
+     * #isConnected()
+     * #close()
+     * #getUrl()
+ * 数据相关方法
+     * #create(path, ephemeral)
+     * #getChildren(path)
+ * 监听相关方法
+     * #addChildListener(path, listener)
+     * #removeChildListener(path, listener)
+     * #addStateListener(listener)
+     * #removeStateListener(listener)
+ */
 public interface ZookeeperClient {
     /**
      * 创建节点

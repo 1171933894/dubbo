@@ -309,7 +309,8 @@ public abstract class AbstractRegistry implements Registry {
     }
 
     /**
-     * 从实现上，我们可以看出，并未向注册中心发起注册，仅仅是添加到 registered 中，进行状态的维护。实际上，真正的实现在 FailbackRegistry 类中
+     * 从实现上，我们可以看出，并未向注册中心发起注册，仅仅是添加到 registered 中，
+     * 进行状态的维护。实际上，真正的实现在 FailbackRegistry 类中
      */
     public void register(URL url) {
         if (url == null) {
@@ -394,6 +395,9 @@ public abstract class AbstractRegistry implements Registry {
         }
     }
 
+    /**
+     * 通知监听器，URL 变化结果
+     */
     protected void notify(List<URL> urls) {
         if (urls == null || urls.isEmpty()) return;
 
