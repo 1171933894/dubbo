@@ -44,7 +44,9 @@ public class NettyClientHandler extends ChannelDuplexHandler {
         this.handler = handler;
     }
 
-
+    /**
+     * 不同于 NettyServerHandler 的该方法，会提交给 handler 继续处理。因为，客户端不会被连接，无需做连入 Channel 的管理
+     */
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         ctx.fireChannelActive();

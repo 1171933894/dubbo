@@ -34,11 +34,17 @@ import java.util.List;
  * NettyCodecAdapter.
  */
 final class NettyCodecAdapter {
-
+    /**
+     * Netty 编码器
+     */
     private final ChannelHandler encoder = new InternalEncoder();
-
+    /**
+     * Netty 解码器
+     */
     private final ChannelHandler decoder = new InternalDecoder();
-
+    /**
+     * Dubbo 编解码器
+     */
     private final Codec2 codec;
 
     private final URL url;

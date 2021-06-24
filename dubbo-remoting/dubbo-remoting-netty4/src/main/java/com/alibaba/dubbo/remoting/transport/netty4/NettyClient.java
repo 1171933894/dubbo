@@ -26,7 +26,6 @@ import com.alibaba.dubbo.remoting.ChannelHandler;
 import com.alibaba.dubbo.remoting.RemotingException;
 import com.alibaba.dubbo.remoting.transport.AbstractClient;
 import com.alibaba.dubbo.remoting.transport.netty4.logging.NettyHelper;
-
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.Channel;
@@ -58,10 +57,15 @@ public class NettyClient extends AbstractClient {
 
     @Override
     protected void doOpen() throws Throwable {
+        // 设置日志工厂
         NettyHelper.setNettyLoggerFactory();
+        // 创建 NettyClientHandler 对象
         final NettyClientHandler nettyClientHandler = new NettyClientHandler(getUrl(), this);
+        // 实例化 ServerBootstrap
         bootstrap = new Bootstrap();
+        // 设置它的线程组
         bootstrap.group(nioEventLoopGroup)
+                // 设置可选项
                 .option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.ALLOCATOR, PooledByteBufAllocator.DEFAULT)
