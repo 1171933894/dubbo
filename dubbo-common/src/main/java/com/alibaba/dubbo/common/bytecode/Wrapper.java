@@ -33,7 +33,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.regex.Matcher;
 
 /**
- * Wrapper.
+ * Wrapper. Wrapper 抽象类，用于创建某个对象的方法调用的包装器，以避免反射调用，提高性能
  */
 public abstract class Wrapper {
     private static final Map<Class<?>, Wrapper> WRAPPER_MAP = new ConcurrentHashMap<Class<?>, Wrapper>(); //class wrapper map

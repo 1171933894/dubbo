@@ -26,7 +26,7 @@ import com.alibaba.dubbo.rpc.RpcResult;
 import java.lang.reflect.InvocationTargetException;
 
 /**
- * InvokerWrapper
+ * InvokerWrapper 实现 Invoker 接口，代理 Invoker 对象的抽象类
  */
 public abstract class AbstractProxyInvoker<T> implements Invoker<T> {
     /**

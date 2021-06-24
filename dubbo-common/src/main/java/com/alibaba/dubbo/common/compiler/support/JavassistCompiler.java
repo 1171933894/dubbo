@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  */
 
 /**
- * Javassist 是一个开源的分析、编辑和创建 Java 字节码的类库。通过使用Javassist 对字节码操作可以实现动态 ”AOP” 框架。
+ * Javassist 是一个开源的分析、编辑和创建 Java 字节码的类库。通过使用 Javassist 对字节码操作可以实现动态 ”AOP” 框架。
  *
  * 关于 Java 字节码的处理，目前有很多工具，如 bcel，asm( cglib只是对asm又封装了一层 )。不过这些都需要直接跟虚拟机指令打交道。
  *

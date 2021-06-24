@@ -24,7 +24,8 @@ package com.alibaba.dubbo.rpc.service;
 /**
  * 回声测试用于检测服务是否可用，回声测试按照正常请求流程执行，能够测试整个调用是否通畅，可用于监控
  *
- * [服务消费者]所有服务自动实现 EchoService 接口，只需将任意服务引用强制转型为 EchoService，即可使用(服务提供者，是不实现 EchoService 接口，而是通过 EchoFilter 实现)
+ * [服务消费者]所有服务自动实现 EchoService 接口，只需将任意服务引用强制转型为 EchoService，
+ * 即可使用(服务提供者，是不实现 EchoService 接口，而是通过 EchoFilter 实现)
  */
 public interface EchoService {
 

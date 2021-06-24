@@ -34,6 +34,10 @@ public class JavassistProxyFactory extends AbstractProxyFactory {
         return (T) Proxy.getProxy(interfaces).newInstance(new InvokerInvocationHandler(invoker));
     }
 
+    /**
+     * 在 Provider 中，XXXProtocol 会获得被调用的 Exporter 对象，从而获得到 Invoker 对象。但是呢，Invoker
+     * 对象实际和 Service 实现对象，是无法直接调用，需要有中间的一层 Wrapper 来代理分发到 Service 对应的方法
+     */
     public <T> Invoker<T> getInvoker(T proxy, Class<T> type, URL url) {
         // TODO Wrapper cannot handle this scenario correctly: the classname contains '$'
         // Wrapper类不能正确处理带$的类名
