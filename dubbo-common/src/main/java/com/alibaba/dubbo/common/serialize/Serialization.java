@@ -35,6 +35,7 @@ public interface Serialization {
      *
      * @return content type id
      */
+    // 获得内容类型编号
     byte getContentTypeId();
 
     /**
@@ -42,6 +43,7 @@ public interface Serialization {
      *
      * @return content type
      */
+    // 获得内容类型名
     String getContentType();
 
     /**
@@ -52,6 +54,7 @@ public interface Serialization {
      * @return serializer
      * @throws IOException
      */
+    // 创建 ObjectOutput 对象，序列化输出到 OutputStream
     @Adaptive
     ObjectOutput serialize(URL url, OutputStream output) throws IOException;
 
@@ -63,6 +66,7 @@ public interface Serialization {
      * @return deserializer
      * @throws IOException
      */
+    // 创建 ObjectInput 对象，从 InputStream 反序列化
     @Adaptive
     ObjectInput deserialize(URL url, InputStream input) throws IOException;
 
