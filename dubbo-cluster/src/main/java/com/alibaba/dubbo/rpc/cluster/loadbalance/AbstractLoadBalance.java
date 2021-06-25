@@ -44,7 +44,7 @@ public abstract class AbstractLoadBalance implements LoadBalance {
      * 如果 provider 运行了 10 分钟，那么 weight 为 100，即只有最终需要承担的 100% 流量；
      */
     static int calculateWarmupWeight(int uptime, int warmup, int weight) {
-        // 计算权重
+        // 计算权重（进度百分比 * 权重）
         int ww = (int) ((float) uptime / ((float) warmup / (float) weight));
         // 权重范围为 [0, weight] 之间
         return ww < 1 ? 1 : (ww > weight ? weight : ww);

@@ -32,6 +32,27 @@ import java.util.Random;
 
 /**
  * 实现 AbstractLoadBalance 抽象类，最少活跃调用数，相同活跃数的随机，活跃数指调用前后计数差
+ *
+ * 最小活跃数算法实现：
+ * 假定有3台dubbo provider:
+ *
+ * 10.0.0.1:20884, weight=2，active=2
+ * 10.0.0.1:20886, weight=3，active=4
+ * 10.0.0.1:20888, weight=4，active=3
+ * active=2最小，且只有一个2，所以选择10.0.0.1:20884
+ *
+ * 假定有3台dubbo provider:
+ *
+ * 10.0.0.1:20884, weight=2，active=2
+ * 10.0.0.1:20886, weight=3，active=2
+ * 10.0.0.1:20888, weight=4，active=3
+ * active=2最小，且有2个，所以从[10.0.0.1:20884,10.0.0.1:20886 ]中选择；
+ * 接下来的算法与随机算法类似：
+ *
+ * 假设offset=1（即random.nextInt(5)=1）
+ * 1-2=-1<0？是，所以选中 10.0.0.1:20884, weight=2
+ * 假设offset=4（即random.nextInt(5)=4）
+ * 4-2=2<0？否，这时候offset=2， 2-3<0？是，所以选中 10.0.0.1:20886, weight=3
  */
 public class LeastActiveLoadBalance extends AbstractLoadBalance {
 
