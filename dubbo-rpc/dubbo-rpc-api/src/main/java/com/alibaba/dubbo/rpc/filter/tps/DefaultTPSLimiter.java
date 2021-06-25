@@ -28,7 +28,7 @@ public class DefaultTPSLimiter implements TPSLimiter {
     /**
      * StatItem 集合
      *
-     * key：服务名
+     * key：服务名（以服务为维度）
      */
     private final ConcurrentMap<String, StatItem> stats
             = new ConcurrentHashMap<String, StatItem>();

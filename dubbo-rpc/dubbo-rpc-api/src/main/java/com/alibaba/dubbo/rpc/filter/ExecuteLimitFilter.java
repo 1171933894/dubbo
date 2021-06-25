@@ -35,6 +35,7 @@ import java.util.concurrent.Semaphore;
 /**
  * 实现 Filter 接口，服务提供者每服务、每方法的最大可并行执行请求数的过滤器实现类
  *
+ * 在 <dubbo:method /> 的 "actives" 和 "executes" 配置项，可以自定义每个方法的配置
  */
 @Activate(group = Constants.PROVIDER, value = Constants.EXECUTES_KEY)
 public class ExecuteLimitFilter implements Filter {

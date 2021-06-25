@@ -25,7 +25,10 @@ import com.alibaba.dubbo.rpc.Result;
 import com.alibaba.dubbo.rpc.RpcException;
 
 /**
- * ClassLoaderInvokerFilter
+ * ClassLoaderInvokerFilter 类加载器切换过滤器实现类
+ *
+ * 在设计目的中，切换到加载了接口定义的类加载器，以便实现
+ * 与相同的类加载器上下文一起工作
  */
 @Activate(group = Constants.PROVIDER, order = -30000)
 public class ClassLoaderFilter implements Filter {

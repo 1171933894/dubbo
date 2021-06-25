@@ -32,6 +32,8 @@ import com.alibaba.dubbo.rpc.RpcStatus;
 
 /**
  * 实现 Filter 接口，每服务消费者每服务、每方法的最大可并行调用数限制的过滤器实现类
+ *
+ * ActiveLimitFilter ，在服务消费者，通过 <dubbo:reference /> 的 "actives" 统一配置项开启
  */
 @Activate(group = Constants.CONSUMER, value = Constants.ACTIVES_KEY)
 public class ActiveLimitFilter implements Filter {

@@ -63,6 +63,9 @@ public class RpcContext {
     };
     /**
      * 隐式参数集合
+     *
+     * 例如，我们在 PRC 调用前，可在业务代码里添加一些想要传递给服务的参数到该属性
+     * 又例如，在分布式链路追踪时，添加链路追踪编号到该属性中。
      */
     private final Map<String, String> attachments = new HashMap<String, String>();
     // 实际未使用
