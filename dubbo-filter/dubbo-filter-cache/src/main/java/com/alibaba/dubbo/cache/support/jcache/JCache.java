@@ -30,7 +30,7 @@ import javax.cache.spi.CachingProvider;
 import java.util.concurrent.TimeUnit;
 
 /**
- * JCache
+ * JCache（与 JSR107 集成，可以桥接各种缓存实现）
  */
 public class JCache implements com.alibaba.dubbo.cache.Cache {
 
