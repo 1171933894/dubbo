@@ -532,8 +532,7 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
     /**
      * Merge url parameters. the order is: override > -D >Consumer > Provider
      *
-     * @param providerUrl
-     * @return
+     * 合并 URL 参数，优先级为配置规则 > 服务消费者配置 > 服务提供者配置
      */
     private URL mergeUrl(URL providerUrl) {
         // 合并消费端参数
@@ -667,16 +666,20 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
      * @param oldUrlInvokerMap
      * @param newUrlInvokerMap
      */
+    // 销毁不再使用的 Invoker 集合
     private void destroyUnusedInvokers(Map<String, Invoker<T>> oldUrlInvokerMap, Map<String, Invoker<T>> newUrlInvokerMap) {
+        // 防御性编程，目前不存在这个情况
         if (newUrlInvokerMap == null || newUrlInvokerMap.size() == 0) {
             destroyAllInvokers();
             return;
         }
         // check deleted invoker
+        // 对比新老集合，计算需要销毁的 Invoker 集合
         List<String> deleted = null;
         if (oldUrlInvokerMap != null) {
             Collection<Invoker<T>> newInvokers = newUrlInvokerMap.values();
             for (Map.Entry<String, Invoker<T>> entry : oldUrlInvokerMap.entrySet()) {
+                // 若不存在，添加到 `deleted` 中
                 if (!newInvokers.contains(entry.getValue())) {
                     if (deleted == null) {
                         deleted = new ArrayList<String>();
@@ -686,12 +689,15 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
             }
         }
 
+        // 若有需要销毁的 Invoker ，则进行销毁
         if (deleted != null) {
             for (String url : deleted) {
                 if (url != null) {
+                    // 移除出 `urlInvokerMap`
                     Invoker<T> invoker = oldUrlInvokerMap.remove(url);
                     if (invoker != null) {
                         try {
+                            // 销毁 Invoker
                             invoker.destroy();
                             if (logger.isDebugEnabled()) {
                                 logger.debug("destory invoker[" + invoker.getUrl() + "] success. ");
