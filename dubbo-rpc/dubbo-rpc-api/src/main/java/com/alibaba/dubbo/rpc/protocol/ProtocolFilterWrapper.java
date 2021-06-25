@@ -54,14 +54,25 @@ public class ProtocolFilterWrapper implements Protocol {
      */
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
         Invoker<T> last = invoker;
-        // 获得过滤器数组
+        // 获得过滤器数组（其中key：Constants.SERVICE_FILTER_KEY和Constants.REFERENCE_FILTER_KEY；其中group：provider或consumer）
+        /**
+         * EchoFilter
+         * ClassLoaderFilter
+         * GenericFilter
+         * ContextFilter
+         * TraceFilter
+         * TimeoutFilter
+         * MonitorFilter
+         * ExceptionFilter
+         * 【自定义】
+         */
         List<Filter> filters = ExtensionLoader.getExtensionLoader(Filter.class).getActivateExtension(invoker.getUrl(), key, group);
         // 倒序循环 Filter ，创建带 Filter 链的 Invoker 对象
         if (filters.size() > 0) {
             for (int i = filters.size() - 1; i >= 0; i--) {
                 final Filter filter = filters.get(i);
                 final Invoker<T> next = last;
-                last = new Invoker<T>() {
+                last = new Invoker<T>() {// 使用了很多匿名的Invoker
 
                     public Class<T> getInterface() {
                         return invoker.getInterface();
