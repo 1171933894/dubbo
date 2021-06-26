@@ -179,6 +179,9 @@ public class GenericImplFilter implements Filter {
             }
 
             // 通过隐式参数，传递 `generic` 配置项
+            /**
+             * 把泛化类型设置到invocation的附加属性中，泛化类型需要被传递给服务端，以便服务端根据具体泛化类型对参数进行反序列化处理
+             */
             ((RpcInvocation) invocation).setAttachment(
                     Constants.GENERIC_KEY, invoker.getUrl().getParameter(Constants.GENERIC_KEY));
         }

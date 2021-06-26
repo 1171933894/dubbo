@@ -32,6 +32,15 @@ import java.util.Map;
 /**
  * ContextInvokerFilter
  */
+
+/**
+ * 实现原理：
+ * 在AbstractClusterInvoker类的invoke()方法内，把附加属性键值对放入RpcInvocation的attachments变量中，
+ * 然后经过网络传输到服务提供端；服务提供端则使用ContextFilter对请求进行拦截，并从RpcInvocation中获取attachments
+ * 中的键值对，设值到RpcContext中。
+ *
+ * 【注意】用于框架继承，不建议常规业务使用
+ */
 @Activate(group = Constants.PROVIDER, order = -10000)
 public class ContextFilter implements Filter {
 

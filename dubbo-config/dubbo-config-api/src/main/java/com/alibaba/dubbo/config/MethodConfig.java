@@ -47,6 +47,9 @@ public class MethodConfig extends AbstractMethodConfig {
     private Boolean reliable;
 
     // thread limits for method invocations
+    /**
+     * 服务端并发控制数（会被ExecuteLimitFilter使用）
+     */
     private Integer executes;
 
     // if it's deprecated

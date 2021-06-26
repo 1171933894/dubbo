@@ -60,6 +60,11 @@ import java.util.Set;
 
 /**
  * 实现 NotifyListener 接口，实现 AbstractDirectory 抽象类，基于注册中心的 Directory 实现类
+ *
+ * 【RegistryDirectory什么时候创建?】
+ * 在消费端应用中，每个需要消费的服务都被包装为ReferenceConfig，在应用启动时会调用每个服务对应的ReferenceConfig
+ * 的get()方法，然后会为每个服务创建一个自己的RegistryDirectory对象，每个RegistryDirectory管理该服务提供者的
+ * 地址列表、路由列表、动态配置等信息。
  */
 public class RegistryDirectory<T> extends AbstractDirectory<T> implements NotifyListener {
 

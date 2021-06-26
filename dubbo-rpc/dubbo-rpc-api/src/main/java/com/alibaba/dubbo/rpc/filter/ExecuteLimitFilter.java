@@ -36,6 +36,9 @@ import java.util.concurrent.Semaphore;
  * 实现 Filter 接口，服务提供者每服务、每方法的最大可并行执行请求数的过滤器实现类
  *
  * 在 <dubbo:method /> 的 "actives" 和 "executes" 配置项，可以自定义每个方法的配置
+ *
+ * ActiveLimitFilter中激活并发量达到指定值后，当前客户端请求线程会被挂起，并等待，超时后
+ * 抛出异常。ExecuteLimitFilter中设置并发数量后，请求数量大于设置数量直接抛出异常。
  */
 @Activate(group = Constants.PROVIDER, value = Constants.EXECUTES_KEY)
 public class ExecuteLimitFilter implements Filter {
@@ -55,7 +58,7 @@ public class ExecuteLimitFilter implements Filter {
              * http://manzhizhen.iteye.com/blog/2386408
              * use semaphore for concurrency control (to limit thread number)
              */
-            // 获得信号量。若获得不到，抛出异常。
+            // 获得信号量。若获得不到，抛出异常。(不等待)
             executesLimit = count.getSemaphore(max);
             if(executesLimit != null && !(acquireResult = executesLimit.tryAcquire())) {
                 throw new RpcException("Failed to invoke method " + invocation.getMethodName() + " in provider " + url + ", cause: The service using threads greater than <dubbo:service executes=\"" + max + "\" /> limited.");

@@ -42,6 +42,9 @@ public abstract class AbstractMethodConfig extends AbstractConfig {
     protected Integer retries;
 
     // max concurrent invocations
+    /**
+     * 设置激活并发限制个数（会被ActiveLimitFilter使用）
+     */
     protected Integer actives;
 
     // load balance

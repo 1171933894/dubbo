@@ -36,8 +36,10 @@ import java.util.List;
  * 中文直译为目录，代表了多个 Invoker ，可以把它看成 List<Invoker> 。但与 List 不同的是，
  * 它的值可能是动态变化的，比如注册中心推送变更
  *
- * StaticDirectory ，静态 Directory 实现类，从命名上看出它是静态的 List<Invoker> 。
- * RegistryDirectory ，基于注册中心的动态 Directory 实现类，从命名上看出它是动态的，会根据注册中心的推送变更 List<Invoker> 。
+ * 【重要子类】
+ * 在Dubbo中，接口Directory的实现有RegistryDirectory和StaticDirectory两种，其中前者
+ * 管理的invoker列表是根据服务注册中心的推送变化而变化的，而后者是当消费端使用了多注册中心时，
+ * 把所有服务注册中心的invoker列表汇集到一个invoker列表中
  */
 public interface Directory<T> extends Node {
 
