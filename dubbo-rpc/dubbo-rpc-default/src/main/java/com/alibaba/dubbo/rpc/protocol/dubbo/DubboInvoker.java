@@ -94,7 +94,7 @@ public class DubboInvoker<T> extends AbstractInvoker<T> {
             int timeout = getUrl().getMethodParameter(methodName, Constants.TIMEOUT_KEY, Constants.DEFAULT_TIMEOUT);
             if (isOneway) {// 单向调用
                 boolean isSent = getUrl().getMethodParameter(methodName, Constants.SENT_KEY, false);
-                currentClient.send(inv, isSent);
+                currentClient.send(inv, isSent);// 【注意】发送消息，而不是请求
                 RpcContext.getContext().setFuture(null);
                 return new RpcResult();
             } else if (isAsync) {// 异步调用

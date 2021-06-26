@@ -39,6 +39,10 @@ import java.util.concurrent.Future;
 /**
  * EventFilter
  */
+
+/**
+ * 在调用之前、调用之后、出现异常时，会触发 oninvoke、onreturn、onthrow 三个事件，可以配置当事件发生时，通知哪个类的哪个方法
+ */
 @Activate(group = Constants.CONSUMER)// @Activate(group = Constants.CONSUMER) 注解，基于 Dubbo SPI Activate 机制，只有服务消费者才生效该过滤器
 public class FutureFilter implements Filter {
 
@@ -144,6 +148,7 @@ public class FutureFilter implements Filter {
         // 调用前置方法
         Object[] params = invocation.getArguments();
         try {
+            // 反射调用前置方法
             onInvokeMethod.invoke(onInvokeInst, params);
         } catch (InvocationTargetException e) {
             fireThrowCallback(invoker, invocation, e.getTargetException());
@@ -186,7 +191,7 @@ public class FutureFilter implements Filter {
             params = new Object[]{result};
         }
         try {
-            onReturnMethod.invoke(onReturnInst, params);
+            onReturnMethod.invoke(onReturnInst, params);// 调用方法
         } catch (InvocationTargetException e) {
             fireThrowCallback(invoker, invocation, e.getTargetException());
         } catch (Throwable e) {

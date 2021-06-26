@@ -72,13 +72,21 @@ public class DubboProtocol extends AbstractProtocol {
     //consumer side export a stub service for dispatching event
     //servicekey-stubmethods
     private final ConcurrentMap<String, String> stubServiceMethodsMap = new ConcurrentHashMap<String, String>();
+    /**
+     * 在 DubboProtocol 类中，实现了自己的 ExchangeHandler 对象，处理请求、消息、连接、断开连接等事件。对于服务消费者的远程调用，
+     * 通过 #reply(ExchangeChannel channel, Object message) 和 #reply(Channel channel, Object message) 方法来处理
+     */
+    // 用于处理服务消费者的【同步调用】和【异步调用】的请求
     private ExchangeHandler requestHandler = new ExchangeHandlerAdapter() {
 
         public Object reply(ExchangeChannel channel, Object message) throws RemotingException {
             if (message instanceof Invocation) {
                 Invocation inv = (Invocation) message;
-                // 获得请求对应的 Invoker 对象
+                // 获得请求对应的 Invoker 对象（重点方法）
                 Invoker<?> invoker = getInvoker(channel, inv);
+
+
+
                 // need to consider backward-compatibility if it's a callback
                 // 如果是callback 需要处理高版本调用低版本的问题
                 if (Boolean.TRUE.toString().equals(inv.getAttachments().get(IS_CALLBACK_SERVICE_INVOKE))) {
@@ -102,6 +110,9 @@ public class DubboProtocol extends AbstractProtocol {
                 }
                 // 设置调用方的地址
                 RpcContext.getContext().setRemoteAddress(channel.getRemoteAddress());
+
+
+
                 // 执行调用
                 return invoker.invoke(inv);
             }

@@ -147,6 +147,9 @@ public class RpcUtils {
     }
 
     // 服务引用或方法，任一配置 async = true ，即为异步
+    /**
+     * RpcContext#asyncCall(Callable) 方法，可以设置
+     */
     public static boolean isAsync(URL url, Invocation inv) {
         boolean isAsync;
         if (Boolean.TRUE.toString().equals(inv.getAttachment(Constants.ASYNC_KEY))) {
