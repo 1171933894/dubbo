@@ -35,26 +35,32 @@ public class JettyHttpServer extends AbstractHttpServer {
 
     private static final Logger logger = LoggerFactory.getLogger(JettyHttpServer.class);
 
+    /**
+     * 内嵌的 Jetty 服务器
+     */
     private Server server;
 
     public JettyHttpServer(URL url, final HttpHandler handler) {
         super(url, handler);
+        // 注册 HttpHandler 到 DispatcherServlet 中
         DispatcherServlet.addHttpHandler(url.getParameter(Constants.BIND_PORT_KEY, url.getPort()), handler);
 
+        // 创建线程池
         int threads = url.getParameter(Constants.THREADS_KEY, Constants.DEFAULT_THREADS);
         QueuedThreadPool threadPool = new QueuedThreadPool();
         threadPool.setDaemon(true);
         threadPool.setMaxThreads(threads);
         threadPool.setMinThreads(threads);
 
+        // 创建 Jetty Connector 对象
         SelectChannelConnector connector = new SelectChannelConnector();
-
         String bindIp = url.getParameter(Constants.BIND_IP_KEY, url.getHost());
         if (!url.isAnyHost() && NetUtils.isValidLocalHost(bindIp)) {
             connector.setHost(bindIp);
         }
         connector.setPort(url.getParameter(Constants.BIND_PORT_KEY, url.getPort()));
 
+        // 创建内嵌的 Jetty 对象
         server = new Server();
         server.setThreadPool(threadPool);
         server.addConnector(connector);
@@ -63,10 +69,11 @@ public class JettyHttpServer extends AbstractHttpServer {
         ServletHolder servletHolder = servletHandler.addServletWithMapping(DispatcherServlet.class, "/*");
         servletHolder.setInitOrder(2);
 
+        // 添加 DispatcherServlet 到 Jetty 中
         server.addHandler(servletHandler);
 
         try {
-            server.start();
+            server.start();// 启动 Jetty
         } catch (Exception e) {
             throw new IllegalStateException("Failed to start jetty server on " + url.getParameter(Constants.BIND_IP_KEY) + ":" + url.getParameter(Constants.BIND_PORT_KEY) + ", cause: "
                     + e.getMessage(), e);

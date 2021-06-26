@@ -28,6 +28,7 @@ public interface HttpServer extends Resetable {
      *
      * @return http handler.
      */
+    // 处理器
     HttpHandler getHttpHandler();
 
     /**
@@ -35,6 +36,7 @@ public interface HttpServer extends Resetable {
      *
      * @return url
      */
+    // 【属性相关】
     URL getUrl();
 
     /**
@@ -59,6 +61,7 @@ public interface HttpServer extends Resetable {
      *
      * @return bound
      */
+    // 【状态相关】
     boolean isBound();
 
     /**
