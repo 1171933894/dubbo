@@ -34,6 +34,12 @@ import java.util.List;
 
 /**
  * 实现 Comparable 接口，路由规则接口
+ *
+ * 【作用】
+ * 路由接口会根据用户配置的不同路由策略对Invoker列表进行过滤，只
+ * 返回符合规则的Invoker。例如：如果用户配置了接口A的所有调用，都
+ * 使用IP为192.168.1.22的节点，则路由会过滤其他的Invoker，只
+ * 返回IP为192.168.1.22的Invoker。
  */
 public interface Router extends Comparable<Router> {
 
