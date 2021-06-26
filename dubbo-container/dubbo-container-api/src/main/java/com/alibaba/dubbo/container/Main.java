@@ -33,6 +33,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Main. (API, Static, ThreadSafe)
  */
+// 启动程序，负责初始化 Container 服务容器
 public class Main {
 
     public static final String CONTAINER_KEY = "dubbo.container";

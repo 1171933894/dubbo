@@ -144,6 +144,18 @@ public class ProtocolConfig extends AbstractConfig {
         setPort(port);
     }
 
+    /**
+     * 服务提供方
+     *
+     * 停止时，先标记为不接收新请求，新请求过来时直接报错，让客户端重试其它机器。 //<1>
+     * 然后，检测线程池中的线程是否正在运行，如果有，等待所有线程执行完成，除非超时，则强制关闭。 // <2>
+     *
+     *
+     * 服务消费方
+     *
+     * 停止时，不再发起新的调用请求，所有新的调用在客户端即报错。 // <3>
+     * 然后，检测有没有请求的响应还没有返回，等待响应返回，除非超时，则强制关闭。 // <4>
+     */
     // TODO: 2017/8/30 to move this method somewhere else
     public static void destroyAll() {
         // 忽略，若已经销毁
@@ -151,6 +163,9 @@ public class ProtocolConfig extends AbstractConfig {
             return;
         }
         // 销毁 Registry 相关
+        /**
+         * 销毁所有 Registry ，取消应用程序中的服务提供者和消费者的订阅与注册
+         */
         AbstractRegistryFactory.destroyAll();
 
         // Wait for registry notification

@@ -30,14 +30,27 @@ import java.util.Properties;
 /**
  * Log4jContainer. (SPI, Singleton, ThreadSafe)
  */
+// Log4j 容器实现类，自动配置 log4j 的配置，在多进程启动时，自动给日志文件按进程分目录
 public class Log4jContainer implements Container {
 
+    /**
+     * 日志文件路径配置 KEY
+     */
     public static final String LOG4J_FILE = "dubbo.log4j.file";
 
+    /**
+     * 日志级别配置 KEY
+     */
     public static final String LOG4J_LEVEL = "dubbo.log4j.level";
 
+    /**
+     * 日志文件路径配置 KEY
+     */
     public static final String LOG4J_SUBDIRECTORY = "dubbo.log4j.subdirectory";
 
+    /**
+     * 默认日志级别 - ERROR
+     */
     public static final String DEFAULT_LOG4J_LEVEL = "ERROR";
 
     @SuppressWarnings("unchecked")

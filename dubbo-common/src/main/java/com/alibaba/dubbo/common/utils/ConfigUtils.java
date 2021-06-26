@@ -308,7 +308,9 @@ public class ConfigUtils {
 
     @SuppressWarnings("deprecation")
     public static int getServerShutdownTimeout() {
+        // 默认，10 * 1000 毫秒
         int timeout = Constants.DEFAULT_SERVER_SHUTDOWN_TIMEOUT;
+        // 获得 "dubbo.service.shutdown.wait" 配置项，单位：毫秒
         String value = ConfigUtils.getProperty(Constants.SHUTDOWN_WAIT_KEY);
         if (value != null && value.length() > 0) {
             try {
@@ -316,6 +318,8 @@ public class ConfigUtils {
             } catch (Exception e) {
             }
         } else {
+            // 若为空，获得 "dubbo.service.shutdown.wait.seconds" 配置项，单位：秒。
+            // ps：目前已经废弃该参数，推荐使用 "dubbo.service.shutdown.wait"
             value = ConfigUtils.getProperty(Constants.SHUTDOWN_WAIT_SECONDS_KEY);
             if (value != null && value.length() > 0) {
                 try {
