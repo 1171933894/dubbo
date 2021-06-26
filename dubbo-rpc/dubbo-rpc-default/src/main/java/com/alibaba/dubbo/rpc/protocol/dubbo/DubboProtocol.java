@@ -339,6 +339,9 @@ public class DubboProtocol extends AbstractProtocol {
         boolean service_share_connect = false;// 是否共享连接
         int connections = url.getParameter(Constants.CONNECTIONS_KEY, 0);
         // if not configured, connection is shared, otherwise, one connection for one service
+        /**
+         * 通过下面的代码可知，在默认情况下当消费端引用同一个服务提供者机器上多个服务时，这些服务复用一个Netty连接
+         */
         if (connections == 0) {// 未配置时，默认共享
             service_share_connect = true;
             connections = 1;
