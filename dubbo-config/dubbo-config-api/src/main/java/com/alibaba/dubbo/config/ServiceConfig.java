@@ -68,7 +68,12 @@ import static com.alibaba.dubbo.common.utils.NetUtils.isInvalidPort;
  */
 
 /**
- * 服务提供者暴露服务配置类
+ * 【服务提供者暴露服务配置类暴露一个服务过程】
+ * ServiceConfig类引用对外提供服务的实现类ref，然后通过ProxyFactory接口
+ * 扩展实现类的getInvoker()方法使用ref生成一个AbstractProxyInvoker实例，
+ * 到这一步就完成了具体服务到Invoker的转换。接下来就是Invoker转换到Exporter
+ * 的过程（该过程发生在DubboProtocol的export()方法中）。然后再启动Netty Server
+ * 监听服务连接，然后将服务注册到服务注册中心。
  */
 public class ServiceConfig<T> extends AbstractServiceConfig {
 

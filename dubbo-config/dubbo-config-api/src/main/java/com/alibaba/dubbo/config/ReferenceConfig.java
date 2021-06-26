@@ -385,6 +385,10 @@ public class ReferenceConfig<T> extends AbstractReferenceConfig {
         // 添加到 StaticContext 进行缓存
         //attributes are stored by system context.
         StaticContext.getSystemContext().putAll(attributes);
+        /**
+         * Duubo协议的Invoker转换为客户端想要的接口，发生在ProxyFactory接口的扩展实现类的getProxy()方法中，
+         * 它主要是使用代理对服务接口的调用转换为对Invoker的调用
+         */
         ref = createProxy(map);// 开始引用服务
         ConsumerModel consumerModel = new ConsumerModel(getUniqueServiceName(), this, ref, interfaceClass.getMethods());
         ApplicationModel.initConsumerModel(getUniqueServiceName(), consumerModel);
