@@ -495,7 +495,7 @@ public abstract class AbstractConfig implements Serializable {
                         property = "interface";
                     }
                     String setter = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
-                    Object value = method.invoke(annotation, new Object[0]);
+                    Object value = method.invoke(annotation, new Object[0]);// 从注解对象中获取属性
                     if (value != null && !value.equals(method.getDefaultValue())) {
                         Class<?> parameterType = ReflectUtils.getBoxedClass(method.getReturnType());
                         if ("filter".equals(property) || "listener".equals(property)) {

@@ -36,10 +36,10 @@ public abstract class AbstractServiceConfig extends AbstractInterfaceConfig {
 
     private static final long serialVersionUID = 1L;
 
-    // version
+    // version和group相对
     protected String version;
 
-    // group
+    // group和version相对
     protected String group;
 
     // whether the service is deprecated

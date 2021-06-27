@@ -115,7 +115,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
      */
     private T ref;
     // service name
-    private String path;
+    private String path;// path = interfaceName;
     // method configuration
     private List<MethodConfig> methods;
     private ProviderConfig provider;
@@ -370,6 +370,7 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         }
         // 暴露服务
         doExportUrls();
+        // 下面这两句用来做什么的呢？
         ProviderModel providerModel = new ProviderModel(getUniqueServiceName(), this, ref);
         ApplicationModel.initProviderModel(getUniqueServiceName(), providerModel);
     }
