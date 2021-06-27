@@ -53,7 +53,7 @@ public class ProtocolFilterWrapper implements Protocol {
      * @return Invoker 对象
      */
     private static <T> Invoker<T> buildInvokerChain(final Invoker<T> invoker, String key, String group) {
-        // last故名思意，就是最后一个调用
+        // last顾名思意，就是最后一个调用
         Invoker<T> last = invoker;
         // 获得过滤器数组（其中key：Constants.SERVICE_FILTER_KEY和Constants.REFERENCE_FILTER_KEY；其中group：provider或consumer）
         /**

@@ -62,6 +62,10 @@ public abstract class AbstractProtocol implements Protocol {
         return ProtocolUtils.serviceKey(port, serviceName, serviceVersion, serviceGroup);
     }
 
+    /**
+     * 【疑问】
+     * 1、不应该先销毁exporters再invokers么？
+     */
     public void destroy() {
         for (Invoker<?> invoker : invokers) {
             if (invoker != null) {

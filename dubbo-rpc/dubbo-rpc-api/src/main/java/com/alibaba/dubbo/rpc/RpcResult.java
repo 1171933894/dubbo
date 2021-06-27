@@ -46,6 +46,9 @@ public class RpcResult implements Result, Serializable {
         this.exception = exception;
     }
 
+    /**
+     * 该方法是有异常就抛出异常，没有异常才会正常返回结果
+     */
     public Object recreate() throws Throwable {
         // 有异常，抛出异常
         if (exception != null) {
