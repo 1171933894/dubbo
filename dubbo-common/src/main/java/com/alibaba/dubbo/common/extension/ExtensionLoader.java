@@ -136,7 +136,7 @@ public class ExtensionLoader<T> {
      */
     private final ConcurrentMap<Class<?>, String> cachedNames = new ConcurrentHashMap<Class<?>, String>();
     /**
-     * 缓存的拓展实现类集合。
+     * 缓存的拓展实现类集合。(普通扩展类缓存)
      * <p>
      * 不包含如下两种类型：
      * 1. 自适应拓展实现类。例如 AdaptiveExtensionFactory
@@ -670,6 +670,9 @@ public class ExtensionLoader<T> {
              *
              * 通过 Wrapper 类可以把所有扩展点公共逻辑移至 Wrapper 中。新加的 Wrapper 在所有的扩展点上添加了逻辑，有些类似 AOP，即 Wrapper 代理了扩展点。
              */
+            /**
+             * 按照cachedWrapperClasses的顺序来包装,即是按照配置文件中配置的先后顺序
+             */
             Set<Class<?>> wrapperClasses = cachedWrapperClasses;
             if (wrapperClasses != null && wrapperClasses.size() > 0) {
                 for (Class<?> wrapperClass : wrapperClasses) {
@@ -838,7 +841,7 @@ public class ExtensionLoader<T> {
                                             if (clazz.isAnnotationPresent(Adaptive.class)) {
                                                 if (cachedAdaptiveClass == null) {
                                                     cachedAdaptiveClass = clazz;
-                                                } else if (!cachedAdaptiveClass.equals(clazz)) {
+                                                } else if (!cachedAdaptiveClass.equals(clazz)) {// @Adaptive注解只能被一个类标注
                                                     throw new IllegalStateException("More than 1 adaptive class found: "
                                                             + cachedAdaptiveClass.getClass().getName()
                                                             + ", " + clazz.getClass().getName());
@@ -982,6 +985,11 @@ public class ExtensionLoader<T> {
         if (!hasAdaptiveAnnotation)
             throw new IllegalStateException("No adaptive method on extension " + type.getName() + ", refuse to create the adaptive class!");
 
+        /**
+         * 生成package/import/类名称等头部信息。此处只会引入一个类ExtensionLoader。
+         * 为了不写其他类的import方法，其他方法调用全部使用全路径。类名称会变成“接口名称”+”$Adaptive”
+         * 的格式
+         */
         codeBuidler.append("package " + type.getPackage().getName() + ";");
         codeBuidler.append("\nimport " + ExtensionLoader.class.getName() + ";");
         codeBuidler.append("\npublic class " + type.getSimpleName() + "$Adaptive" + " implements " + type.getCanonicalName() + " {");
@@ -993,11 +1001,13 @@ public class ExtensionLoader<T> {
 
             Adaptive adaptiveAnnotation = method.getAnnotation(Adaptive.class);
             StringBuilder code = new StringBuilder(512);
+            // 方法上没有@Adaptive注解，该方法是个空方法
             if (adaptiveAnnotation == null) {
                 code.append("throw new UnsupportedOperationException(\"method ")
                         .append(method.toString()).append(" of interface ")
                         .append(type.getName()).append(" is not adaptive method!\");");
             } else {
+                // 计算URL参数对应的参数数组下标待用
                 int urlTypeIndex = -1;
                 for (int i = 0; i < pts.length; ++i) {
                     if (pts[i].equals(URL.class)) {
@@ -1017,7 +1027,7 @@ public class ExtensionLoader<T> {
                 }
                 // did not find parameter in URL type
                 else {
-                    String attribMethod = null;
+                    String attribMethod = null;// 方法入参数列表中没有URL，那么查看是否有RL getter method
 
                     // find URL getter method
                     LBL_PTS:
@@ -1055,6 +1065,11 @@ public class ExtensionLoader<T> {
 
                 String[] value = adaptiveAnnotation.value();
                 // value is not set, use the value generated from class name as the key
+                /**
+                 * 生成默认实现类名称，如果@Adaptive注解中没有设定默认值，则根据类名称
+                 * 生成，如YyyInvokerWrapper会被转换为yyy.invoker.wrapper。生成的
+                 * 规则是不断找大写字符，并把它们用“.”连接起来
+                 */
                 if (value.length == 0) {
                     char[] charArray = type.getSimpleName().toCharArray();
                     StringBuilder sb = new StringBuilder(128);
