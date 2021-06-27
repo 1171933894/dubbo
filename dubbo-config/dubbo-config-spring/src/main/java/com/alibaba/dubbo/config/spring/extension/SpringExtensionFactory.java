@@ -24,6 +24,9 @@ import java.util.Set;
 
 /**
  * SpringExtensionFactory（从这里可以看出来，不写配置文件也是可以）
+ *
+ * 在ReferenceBean和ServiceBean中会调用静态方法保存Spring上下文，
+ * 即一个服务被发布或引用的时候，对应的Spring上下文会被保存下来
  */
 public class SpringExtensionFactory implements ExtensionFactory {
 
