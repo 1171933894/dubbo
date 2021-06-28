@@ -56,7 +56,7 @@ public class HeaderExchangeServer implements ExchangeServer {
     // heartbeat timer
     private ScheduledFuture<?> heatbeatTimer;
     // heartbeat timeout (ms), default value is 0 , won't execute a heartbeat.
-    private int heartbeat;
+    private int heartbeat;// 心跳间隔时间（ms）
     private int heartbeatTimeout;
     private AtomicBoolean closed = new AtomicBoolean(false);
 
