@@ -57,6 +57,9 @@ public class Constants {
 
     public static final String CACHE_KEY = "cache";
 
+    /**
+     * 该属性会决定是否在注册中心创建持久/临时节点
+     */
     public static final String DYNAMIC_KEY = "dynamic";
 
     public static final String DUBBO_PROPERTIES_KEY = "dubbo.properties.file";
