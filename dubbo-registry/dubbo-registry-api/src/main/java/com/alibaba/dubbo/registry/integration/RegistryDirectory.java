@@ -250,6 +250,9 @@ public class RegistryDirectory<T> extends AbstractDirectory<T> implements Notify
         // 设置消费者 URL
         setConsumerUrl(url);
         // 向注册中心，发起订阅
+        /**
+         * 【注意】这里的参数this为NotifyListener
+         */
         registry.subscribe(url, this);
     }
 

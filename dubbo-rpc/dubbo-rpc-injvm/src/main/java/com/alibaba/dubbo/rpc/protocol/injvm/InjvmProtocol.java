@@ -90,6 +90,8 @@ public class InjvmProtocol extends AbstractProtocol implements Protocol {
         return DEFAULT_PORT;
     }
 
+    // --------------------------- injvm没有过滤器这些东西 ----------------------------
+
     /**
      * 创建 InjvmExporter 对象
      */

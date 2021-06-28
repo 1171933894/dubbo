@@ -383,7 +383,7 @@ public class RegistryProtocol implements Protocol {
                 Constants.PROVIDERS_CATEGORY
                         + "," + Constants.CONFIGURATORS_CATEGORY
                         + "," + Constants.ROUTERS_CATEGORY));
-        // 创建 Invoker 对象
+        // 创建 Invoker 对象（经过包装的invoker，实现了负载和容错）
         Invoker invoker = cluster.join(directory);
         // 向本地注册表，注册消费者
         ProviderConsumerRegTable.registerConsuemr(invoker, url, subscribeUrl, directory);
