@@ -43,11 +43,11 @@ public class DecodeHandler extends AbstractChannelHandlerDelegate {
         }
 
         if (message instanceof Request) {
-            decode(((Request) message).getData());
+            decode(((Request) message).getData());// 【注意】只解析data
         }
 
         if (message instanceof Response) {
-            decode(((Response) message).getResult());
+            decode(((Response) message).getResult());// 【注意】只解析result
         }
 
         handler.received(channel, message);

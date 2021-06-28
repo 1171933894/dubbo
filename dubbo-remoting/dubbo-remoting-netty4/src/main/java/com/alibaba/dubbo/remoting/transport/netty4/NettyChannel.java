@@ -45,7 +45,7 @@ final class NettyChannel extends AbstractChannel {
     /**
      * 通道
      */
-    private final Channel channel;
+    private final Channel channel;// netty的channel
     /**
      * 属性集合
      */

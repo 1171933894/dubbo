@@ -30,6 +30,10 @@ public class NettyTransporter implements Transporter {
      */
     public static final String NAME = "netty4";
 
+    /**
+     * @param url     server url
+     * @param listener 为dubbo业务ChannelHandler
+     */
     public Server bind(URL url, ChannelHandler listener) throws RemotingException {
         return new NettyServer(url, listener);
     }

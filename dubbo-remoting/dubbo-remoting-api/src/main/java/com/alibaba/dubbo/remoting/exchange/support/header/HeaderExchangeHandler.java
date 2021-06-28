@@ -36,7 +36,7 @@ import com.alibaba.dubbo.remoting.transport.ChannelHandlerDelegate;
 import java.net.InetSocketAddress;
 
 /**
- * ExchangeReceiver
+ * ExchangeReceiver（ExchangeHandler的装饰模式）
  */
 public class HeaderExchangeHandler implements ChannelHandlerDelegate {
 
