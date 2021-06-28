@@ -218,7 +218,7 @@ public abstract class AbstractInterfaceConfig extends AbstractMethodConfig {
                     for (URL url : urls) {
                         // 设置 `registry=${protocol}` 和 `protocol=registry` 到 URL
                         url = url.addParameter(Constants.REGISTRY_KEY, url.getProtocol());
-                        url = url.setProtocol(Constants.REGISTRY_PROTOCOL);
+                        url = url.setProtocol(Constants.REGISTRY_PROTOCOL);// 【注意】这里强制改写了protocol
                         // 添加到结果
                         if ((provider && url.getParameter(Constants.REGISTER_KEY, true))// 服务提供者 && 注册
                                 || (!provider && url.getParameter(Constants.SUBSCRIBE_KEY, true))) {// 服务消费者 && 订阅
