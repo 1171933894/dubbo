@@ -543,6 +543,9 @@ public class ServiceConfig<T> extends AbstractServiceConfig {
         }
 
         String host = this.findConfigedHosts(protocolConfig, registryURLs, map);
+        /**
+         * 通过该方法逻辑找到没被占用的端口号
+         */
         Integer port = this.findConfigedPorts(protocolConfig, name, map);
         // 创建 Dubbo URL 对象
         URL url = new URL(name, host, port, (contextPath == null || contextPath.length() == 0 ? "" : contextPath + "/") + path, map);
