@@ -42,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * ExchangeServerImpl
+ * ExchangeServerImpl（该类可以理解为private final Server server;的装饰器模式）
  */
 public class HeaderExchangeServer implements ExchangeServer {
 
@@ -199,6 +199,7 @@ public class HeaderExchangeServer implements ExchangeServer {
 
     public void reset(URL url) {
         server.reset(url);
+        // 该类reset只会充值心跳定时器
         try {
             if (url.hasParameter(Constants.HEARTBEAT_KEY)
                     || url.hasParameter(Constants.HEARTBEAT_TIMEOUT_KEY)) {
